@@ -41,7 +41,11 @@ Release v0.2.0
       - [AdaDelta](#adadelta)
       - [Adam (Adaptive Moment Estimation)](#adam-adaptive-moment-estimation)
       - [AdamW](#adamw)
-    - [3.2 Sposoby na ograniczenie overfittingu](#32-sposoby-na-ograniczenie-overfittingu)
+    - [3.2 Batch czy mini batch? Czyli o dzieleniu danych treningowych](#32-batch-czy-mini-batch-czyli-o-dzieleniu-danych-treningowych)
+      - [Metoda spadku gradientu (batch gradient descent)](#metoda-spadku-gradientu-batch-gradient-descent)
+      - [Metoda stochastycznego spadku gradientu (SGD)](#metoda-stochastycznego-spadku-gradientu-sgd)
+      - [Mini-batch gradient descent](#mini-batch-gradient-descent)
+    - [3.3 Sposoby na ograniczenie overfittingu](#33-sposoby-na-ograniczenie-overfittingu)
       - [Hold-out](#hold-out)
       - [Walidacja krzyżowa](#walidacja-krzyżowa)
       - [Regularyzacja](#regularyzacja)
@@ -49,10 +53,13 @@ Release v0.2.0
       - [Eliminacja zmiennych nieistotnych](#eliminacja-zmiennych-nieistotnych)
       - [Wzbogacanie danych treningowych (data augmentation)](#wzbogacanie-danych-treningowych-data-augmentation)
       - [Ograniczanie złożoności modelu](#ograniczanie-złożoności-modelu)
-    - [3.3 XAI](#33-xai)
-    - [3.4 Metody treningu z niewielką lub żadną ilością danych](#34-metody-treningu-z-niewielką-lub-żadną-ilością-danych)
-    - [3.5 Architektury modeli STT i TTS](#35-architektury-modeli-stt-i-tts)
+    - [3.4 XAI](#34-xai)
+    - [3.5 Metody treningu z niewielką lub żadną ilością danych](#35-metody-treningu-z-niewielką-lub-żadną-ilością-danych)
+    - [3.6 Architektury modeli STT i TTS](#36-architektury-modeli-stt-i-tts)
   - [4 Bibliografia](#4-bibliografia)
+  - [5 Słownik pojęć technicznych i anglojęzycznych](#5-słownik-pojęć-technicznych-i-anglojęzycznych)
+    - [A - K](#a---k)
+    - [J - Z](#j---z)
   
 ---
 
@@ -343,7 +350,7 @@ Można to uprawdopodobnić na wiele sposobów. Na przykład podczas inicjalizacj
 
 Zamiast algorytmu stochastycznego spadku gradientowego stosuje się inne, które na różnych etapach treningu promują bardziej eksplorację, niż eksploatację przestrzeni rozwiązań i vice versa. Robią to poprzez modyfikację współczynnika $\lambda$, który odpowiada za wielkość kroku (wyżarzanie kosinusowe). Robią to poprzez szacowanie pędów (momentów) gradientów (rodzina algorytmów Adam).
 
-Kolejną sprawą jest zapobieganie przesadnemu dopasowaniu modelu do danych treningowych. Objawia się to tym, że dla danych treningowych model bardzo trafnie przewiduje wyniki, zaś dla danych spoza tego zbioru model cechuje się gorszą precyzją, która w skrajnych sytuacjach będzie mniej lub bardziej podobna do zgadywania. W terminologii, która bardzo wiele zawdzięcza światu anglosaskiemu, nazywa się to **overfittingiem**. O sposobach na zapobieganie mu [piszę tutaj](#32-sposoby-na-ograniczenie-overfittingu).
+Kolejną sprawą jest zapobieganie przesadnemu dopasowaniu modelu do danych treningowych. Objawia się to tym, że dla danych treningowych model bardzo trafnie przewiduje wyniki, zaś dla danych spoza tego zbioru model cechuje się gorszą precyzją, która w skrajnych sytuacjach będzie mniej lub bardziej podobna do zgadywania. W terminologii, która bardzo wiele zawdzięcza światu anglosaskiemu, nazywa się to **overfittingiem**. O sposobach na zapobieganie mu [piszę tutaj](#32-batch-czy-mini-batch-czyli-o-dzieleniu-danych-treningowych).
 
 ### 1.5 Zastosowania
 
@@ -412,35 +419,35 @@ Pytania, na które poznasz odpowiedź w tym rozdziale.
 
 #### AdamW
 
-### 3.2 Batching
+### 3.2 Batch czy mini batch? Czyli o dzieleniu danych treningowych
 
-#### SGD
-Obliczanie zmiany w wagach po obliczeniu dla jednej obserwacji.
+Istnieją różne podejścia w przekazywaniu danych podczas pętli treningowej. Można podawać cały komplet, w oparciu o który model ustawia swoje wagi. Można podawać je pojedynczo, albo partiami liczącymi po kilka przykładów. Poniżej opisuję ich wady oraz zalety, które warto znać.
 
-Zalety: szybkie zmiany, świetne do treningu w systemach chmurowych
-Wady: Niestabilny trening, ryzyko nietrafienia w optimum
+#### Metoda spadku gradientu (batch gradient descent)
 
+Polega ona na obliczaniu nowych wag po przeprocesowaniu całego zbioru treningowego. Pozwala ona uzyskiwać dokładne poprawki, które są uśrednione dla całego zbioru treningowego. Wyróżnia się dodatkowo stabilnością, przez którą funkcja straty jest malejąca, co widać na wykresie spadku straty. Wadą jest pamięciożerność oraz czasochłonność, gdyż model musi obliczać w każdej epoce predykcje dla wszystkich przykładów.
 
-#### Batch gradient descent
+#### Metoda stochastycznego spadku gradientu (SGD)
 
-Obliczanie zmian po przeprocesowaniu całego kompletu treningowego
+Metoda stochastyczna polega na obliczaniu nowych wag przy użyciu tylko jednej obserwacji ze zbioru treningowego.
 
-Zalety: Dokładne poprawki, stabilna konwergencja
-Wady: Powolne i pracochłonne dla dużych zestawów danych, duże zużycie pamięci
+Dzięki temu pętla treningowa zużywa mniej pamięci, ponieważ trzeba przechowywać mniej predykcji w każdej iteracji. Ta metoda jest też o wiele szybsza. Pozwala ona unikać minimów lokalnych. Świetnie nadaje się zarówno do ogromnych zbiorów danych, jak i systemów chmurowych, a także do urządzeń brzegowych (IoT, telefony, tablety).
 
+Metoda ta za sprawą swoich zalet ma następujące wady. Po pierwsze, trening jest niestabilny, gdyż wagi są gwałtownie zmieniane, a informacja z poprzednich iteracji może zostać zatracona. Po drugie, model podczas treningu wykazuje wysokie tendencje do oscylowania wokół docelowego minimum.
 
-### Mini-batch gradient descent
-Obliczanie zmian dla mniejszych podzbiorów danych treningowych
+Aby ta metoda była skuteczna, należy przed każdą epoką losować kolejność podawania danych treningowych.
 
-Zalety: Szybszy trening, bardziej stabilny od SGD
-Wady: Konieczność doboru właściwego rozmiaru podzbioru
+#### Mini-batch gradient descent
 
+Rozwiązaniem kompromisowym jest dzielenie zbioru treningowego na porcje danych liczące po kilka lub więcej obserwacji. To podejście pozwala zarówno ustabilizować trening, jak i zachować zalety poprzedniej metody takie jak unikanie minimów lokalnych. Jest szeroko wykorzystywana do trenowania ogromnych modeli przy użyciu dużych zbiorów danych.
+
+Jednakże, aby wykorzystać pełen potencjał tej metody, należy próbować różnych rozmiarów tych batch'y (porcji danych). Zaleca się, aby liczba ta była potęgą dwójki, aby móc optymalnie wykorzystywać zasoby obliczeniowe kart graficznych. Można zacząć próbować od wielkości 16 lub 32 obserwacji.
 
 ### 3.3 Sposoby na ograniczenie overfittingu
 
 #### Hold-out
 
-Hold-out polega na dzieleniu zbioru danych na podzbiór treningowy i testowy. W praktyce często wyznacza się też osobny zbiór walidacyjny, który pozwala na bieżąco oceniać postęp treningu epoka za epoką.
+Hold-out polega na dzieleniu zbioru danych na podzbiór treningowy i testowy. W praktyce często wyznacza się też osobny zbiór walidacyjny, który pozwala na bieżąco oceniać postęp treningu po każdej epoce.
 
 #### Walidacja krzyżowa
 
@@ -486,3 +493,12 @@ CNN, RNN i Transformery
 10. [Wel] Illustrated guide to AI. Volume I. The Welch Labs. 2025
 11. A. W. Trask. Zrozumieć głębokie uczenie. Wydawnictwo PWN. Warszawa 2019. ISBN: 978-83-01-20782-3
 12. L. Bhuva. Mini-Batch Gradient Descent: A Comprehensive Guide, [online]. Dostęp w Internecie: <https://medium.com/@lomashbhuva/mini-batch-gradient-descent-a-comprehensive-guide-ba27a6dc4863>. [dostęp: 31.08.2026]
+
+## 5 Słownik pojęć technicznych i anglojęzycznych
+
+### A - K
+
+batch - wsad, partia, porcja (zwykle danych treningowych) \
+konwergencja - zbieżność, podobieństwo \
+
+### J - Z
