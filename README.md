@@ -57,6 +57,7 @@ Release v0.2.0
     - [3.4 XAI](#34-xai)
     - [3.5 Metody treningu z niewielką lub żadną ilością danych](#35-metody-treningu-z-niewielką-lub-żadną-ilością-danych)
     - [3.6 Architektury modeli STT i TTS](#36-architektury-modeli-stt-i-tts)
+    - [3.7 Antykruchość, czyli lekcja dla każdego analityka](#37-antykruchość-czyli-lekcja-dla-każdego-analityka)
   - [4 Bibliografia](#4-bibliografia)
   - [5 Słownik pojęć technicznych i anglojęzycznych](#5-słownik-pojęć-technicznych-i-anglojęzycznych)
   
@@ -64,7 +65,7 @@ Release v0.2.0
 
 ## 1 Wprowadzenie
 
-Rozdział ten opowiada o istocie i zasadzie działania sztucznych sieci neuronowych. Opisuje ich genezę, budowę, zastosowania we współczesnym świecie i mechanizmy, które zachodzą zarówno podczas trenowania, jak i ewaluacji modeli opartych o sztuczne sieci neuronowe.
+Rozdział ten opowiada o istocie i zasadzie działania sztucznych sieci neuronowych (artificial neural network - ANN). Opisuje ich genezę, budowę, zastosowania we współczesnym świecie i mechanizmy, które zachodzą zarówno podczas trenowania, jak i ewaluacji modeli opartych o sztuczne sieci neuronowe.
 
 Pytania, na które poznasz odpowiedź w tym rozdziale.
 
@@ -75,38 +76,48 @@ Pytania, na które poznasz odpowiedź w tym rozdziale.
 
 ### 1.1 Geneza
 
-Bezpośrednią inspiracją dla powstania sztucznych sieci neuronowych (które będę skrótowo odtąd nazywać ANN - Artificial Neural Network) jest budowa neuronów w ludzkim mózgu.
+Bezpośrednią inspiracją dla powstania sztucznych sieci neuronowych (które będę skrótowo odtąd nazywać sieciami neuronowymi lub głębokimi sieciami neuronowymi) jest budowa neuronów w ludzkim mózgu.
 
 ![image](imgs/neuron.png)
 
-Neurony w mózgu składają się z dendrytów, jądra komórkowego, ciała komórkowego, aksonu i synaps. Dendrydy otrzymują sygnały z sąsiednich neuronów i przekazują je do ciała i jądra komórkowego, które modyfikują sygnał. Akson przekazuje nowy sygnał do synaps podłączonych do dendrydów innych neuronów.
+Neurony w mózgu składają się z dendrytów, jądra komórkowego, ciała komórkowego, aksonu i synaps. Dendrydy otrzymują sygnały z sąsiednich neuronów i przekazują je do ciała i jądra komórkowego modyfikującego sygnał. Akson przekazuje nowy sygnał do synaps podłączonych do dendrydów innych neuronów. A dalej odbywa się ten sam proces.
 
-Sygnały w mózgu przechodzą między neuronami, w których poddawane są indywidualnym procesom transformacji. Siła sygnału wyjściowego neuronu zależy od siły sygnałów wejściowych.
+Sygnały w mózgu przechodzą między neuronami, a w każdym z nich poddawane są indywidualnym procesom transformacji.
 
 ### 1.2 Perceptron
 
-Twórcy koncepcji ANN zaproponowali, aby siła sygnałów była reprezentowana przez liczby rzeczywiste, a procesy transformacji polegały na obliczaniu wartości funkcji liniowej zawierającej tyle samo zmiennych, co wejść do danego sztucznego neuronu i zastosowaniu na nich wag, które pozwolą zbalansować wpływ różnych sygnałów na wielkość sygnału wyjściowego. Jest to bardzo ważne, gdyż bez tego pewne części ANN mogłyby w sposób niezamierzony (i na dodatek nieuczciwy) wpływać na wynik końcowy.
-
-Przyjmijmy, że sieć neuronowa została wytrenowana do szacowania wartości mieszkania w zależności od metrażu, odległości od centrum i przeciętnych zarobków w tym mieście. Łatwo da się dostrzec, że dziedzina zmiennej opisującej przeciętne pensje mieści się w przedziale kilku, kilkunastu tysięcy. Gdyby nie stosować wag, to ta właśnie zmienna "przejęłaby kontrolę" nad modelem, co jest absolutnie niepożądane. Chcemy, aby każda zmienna w modelu miała wstępnie te same szanse.
+Twórcy koncepcji ANN zaproponowali, aby odwzorować matematycznie procesy zachodzące w mózgu. W modelu matematycznym procesy transformacji mają polegać na obliczaniu wartości funkcji liniowej poddanej *pewnej operacji* wprowadzającej nieliniowość. Funkcja ta ma mieć tyle samo zmiennych, co wejść do danego neuronu plus wyraz wolny zwany w terminologii uczenia maszynowego *bias*'em.
 
 Tak zbudowany neuron nazywamy perceptronem.
 
-Jest jeszcze jedna rzecz, która odróżnia perceptron od zwyczajnych funkcji liniowych. Bez tej rzeczy sieci głębokie dałoby się uprościć do funkcji liniowych i nie miałyby żadnego zastosowania. Ten element odpowiada za nieliniowość w sieciach głębokich. Jest nim funkcja aktywacji.
+Ta *pewna operacja* odróżnia perceptron od zwyczajnych funkcji liniowych. Bez niej sieci głębokie dałoby się uprościć do funkcji liniowych i nie miałyby żadnego zastosowania. I jest nią funkcja aktywacji.
 
 ### 1.2 Funkcje aktywacji
 
-Funkcja aktywacji jest funkcją, która dla sumy wartości sygnałów i szumu dodawanego przez dany neuron zwraca nieliniowy sygnał na wyjście. Umożliwia ona odwzorowywanie nieliniowych zależności pomiędzy zmiennymi zależnymi (reprezentowanymi przez neurony warstwy końcowej), a zmiennymi wejściowymi (reprezentowanymi przez neurony w warstwie wejściowej). Dzięki temu ANN-y mogą uczyć się przewidywania nieliniowych zależności.
+Funkcja aktywacji jest funkcją, która dla wartości funkcji liniowej zwraca nieliniowy sygnał na wyjście. Umożliwia ona odwzorowywanie nieliniowych zależności pomiędzy zmiennymi zależnymi (reprezentowanymi przez neurony warstwy końcowej), a zmiennymi wejściowymi (reprezentowanymi przez neurony w warstwie wejściowej). Dzięki temu ANN-y mogą uczyć się przewidywania nieliniowych zależności.
 
 #### W przeszłości
 
 W przeszłości używano funkcji trygonometrycznych takich jak funkcja sigmoidalna i tangens hiperboliczny (tanh). Niestety, badacze zauważyli, że powodują one kilka problemów.
 
-1. Wykazują tendencję do nasycania się, co objawia się tym, że nieważne czy wejście ma dużą wartość, czy większą to zwraca ona bardzo małą pochodną, co straszliwie spowalnia trening;
+1. Wykazują tendencję do nasycania się, co objawia się tym, że nieważne czy wejście ma dużą wartość, czy większą to zwraca ona bardzo małą pochodną, co straszliwie spowalnia trening, co można zauważyć na dołączonych ilustracjach;
 2. Niewielkie wartości pochodnych dążące do 0 są piętą achillesową dla komputerów. Błędy numeryczne kumulują się wraz z obliczaniem kolejnych warstw, co utrudnia sprawne korygowanie wag.
+
+![image](imgs/Zrzut%20ekranu%202026-08-27%20132559.png)
+Legenda:
+
+- czerwony kolor: funkcja tangensa hiperbolicznego;
+- żółty kolor: pochodna funkcji tangensa hiperbolicznego;
+
+![image](imgs/Zrzut%20ekranu%202026-08-27%20133044.png)
+Legenda:
+
+- fioletowy kolor: funkcja sigmoidalna;
+- żółty kolor: pochodna funkcji sigmoidalnej;
 
 #### ReLU
 
-Aby rozwiązać oba te problemy zaproponowano funkcję ReLU (Rectified Linear Unit). Dla wartości niezerowych jest liniowa, ale dla ujemnych wartości zwraca zero. Dzięki temu nie nasyca się, a ponadto wykazuje się prostą pochodną, która eliminuje problem błędów numerycznych. Oczywiście są różne wariacje na temat funkcji ReLU, są jeszcze funkcje oparte o stałą $e$, ale na początek warto znać kilka podstawowych funkcji aktywacji.
+Aby rozwiązać oba te problemy zaproponowano funkcję ReLU (Rectified Linear Unit). Dla wartości niezerowych jest liniowa, ale dla ujemnych wartości zwraca zero. Dzięki temu nie nasyca się, a ponadto wykazuje się prostą pochodną, która eliminuje problem błędów numerycznych. Oczywiście są różne wariacje na temat funkcji ReLU, ale na początek warto znać kilka podstawowych funkcji aktywacji.
 
 #### Lista funkcji aktywacji
 
@@ -194,7 +205,9 @@ Liczba neuronów w warstwie wyjściowej odpowiada liczbie klas szacowanej zmienn
 
 #### Propagacja w przód
 
-Warstwa wejścia dostarcza danych liczbowych do neuronów pierwszej warstwy ukrytej. Każdy taki neuron z osobna w warstwie ma własny zestaw wag oraz parametr szumu, zwany *biasem*, którymi traktuje dane wejściowe. Suma iloczynu skalarnego wektora wag i wektora danych wejściowych oraz szumu po zastosowaniu funkcji aktywacji stanowi sygnał wyjściowy danego neuronu. Sygnał ten następnie jest przekazywany do następnej warstwy i ich neuronów i traktowany tak samo.
+Propagacja w przód jest mechanizmem, który pozwala uzyskiwać prognozy po wprowadzeniu do modelu danych wejściowych. Jeśliby spojrzeć na model *z lotu ptaka*, to liczby wprowadzone na wejście są przekazywane DO PRZODU warstwa po warstwie. Sygnał nie jest propagowany ani w kierunku tych samych neuronów w warstwie, ani do tyłu. W innych architekturach np. sieciach rekurencyjnych lub rezydualnych sygnał może być przekazywany od neuronu do neuronu w obrębie warstwy lub może je pomijać.
+
+Warstwa wejścia dostarcza danych liczbowych do neuronów pierwszej warstwy ukrytej. Każdy taki neuron z osobna w warstwie ma własny zestaw wag oraz wyraz wolny, zwany *biasem*, którymi traktuje dane wejściowe. Suma iloczynu skalarnego wektora wag i wektora danych wejściowych oraz wyrazu wolnego po zastosowaniu funkcji aktywacji stanowi sygnał wyjściowy danego neuronu. Sygnał ten następnie jest przekazywany do następnej warstwy oraz ich neuronów i traktowany w ten sam sposób.
 
 $$
 n(x) = f(\sum_i{w_i x_i + b})
@@ -202,11 +215,9 @@ $$
 
 Sygnały z ostatniej warstwy ukrytej dochodzą do warstwy wyjściowej.
 
-Propagacja w przód polega na przekazywaniu sygnałów DO PRZODU warstwa po warstwie. Sygnał nie jest propagowany ani w kierunku tych samych neuronów w warstwie, ani do tyłu. W innych architekturach np. sieciach rekurencyjnych lub rezydualnych sygnał może być przekazywany od neuronu do neuronu w obrębie warstwy lub może je pomijać.
-
 #### Propagacja w tył (Backpropagation)
 
-Propagacja w tył jest algorytmem umożliwiającym wytrenowanie sztucznej sieci neuronowej. Proces treningu składa się z następujących kroków:
+Propagacja w tył jest algorytmem umożliwiającym wytrenowanie sztucznej sieci neuronowej. Trening sieci neuronowej polega na takim dobraniu wag oraz wyrazów wolnych, żeby model mógł przyswoić wzorce, z pomocą których może poprawnie prognozować. Proces treningu składa się z następujących kroków:
 
 1. Ustaw wagi wstępne w modelu;
 2. Użyj danych treningowych do przeprowadzenia propagacji w przód;
@@ -218,10 +229,9 @@ A więc propagacja w tył to nic innego jak przerzucanie błędu modelu od warst
 
 - różnicy;
 - błędu średniokwadratowego;
-- kwadratu odległości euklidesowej;
 - entropii krzyżowej.
 
-Ponieważ w warstwie wyjściowej znajduje się najczęściej więcej niż jeden neuron, a problemy są częściej z gatunku problemów klasyfikacyjnych, to posługujemy się raczej tą ostatnią metodą na obliczenie błędu. Odległość euklidesowa to po prostu błąd średniokwadratowy, lecz dla wektora parametrów wyjściowych. Używany jest do szacowania zmiennych ilościowych. Zaś entropia krzyżowa jest używana do zmiennych jakościowych (kategorialnych). Wyraża się ona wzorem:
+Ponieważ w warstwie wyjściowej znajduje się najczęściej więcej niż jeden neuron, a problemy są częściej z gatunku problemów klasyfikacyjnych, to posługujemy się raczej tą ostatnią metodą na obliczenie błędu. Entropia krzyżowa jest używana do zmiennych jakościowych (kategorialnych). Wyraża się ona wzorem:
 
 $$
 L(y,y')=-\sum_{i=1}^cy_ilog (y'_i)
@@ -233,7 +243,7 @@ $y_i$ - Prawdziwa etykieta oznaczająca przynależność do klasy *i*
 
 $y'_i$ - Przewidywane prawdopodobieństwo przynależności do klasy *i*
 
-Aby można było oszacować zmianę wagi, skorzystamy z techniki gradientowej optymalizacji. Należy obliczyć gradient dla wyjścia modelu oraz przewidywanego wyjścia i odwrócić kierunek w stronę (lokalnego) optimum. Dla funkcji sigmoidalnej postaci:
+Aby można było oszacować zmianę wagi, skorzystamy z techniki spadku gradientowego. Gradient jest operacją matematyczną, która określa funkcje pochodne dla każdego argumentu danej funkcji. Pozwala ona wskazać kierunek i odległość, jaką dzieli dany punkt od miejsca optimum. Należy obliczyć gradient dla wyjścia modelu oraz przewidywanego wyjścia i odwrócić kierunek w stronę (lokalnego) optimum poprzez odwrócenie znaku. Dla funkcji sigmoidalnej postaci:
 
 $$
 f(x)=\frac{1}{1+e^{-x}}
@@ -347,7 +357,7 @@ Właściwe ustawienie wag w sieci głębokiej polega na tym, że dla danego zest
 
 Można to uprawdopodobnić na wiele sposobów. Na przykład podczas inicjalizacji wag losuje się kilka lub więcej zestawów, a następnie dokonuje się selekcji takiego zestawu, który zwraca najmniejszy błąd.
 
-Zamiast algorytmu stochastycznego spadku gradientowego stosuje się inne, które na różnych etapach treningu promują bardziej eksplorację, niż eksploatację przestrzeni rozwiązań i vice versa. Robią to poprzez modyfikację współczynnika $\lambda$, który odpowiada za wielkość kroku (wyżarzanie kosinusowe). Robią to poprzez szacowanie pędów (momentów) gradientów (rodzina algorytmów Adam).
+Klasyczny algorytm stochastycznego spadku gradientowego wzbogaca się innymi metodami, które na różnych etapach treningu promują bardziej eksplorację, niż eksploatację przestrzeni rozwiązań i vice versa. Jedne metody robią to poprzez modyfikację współczynnika $\lambda$, który odpowiada za wielkość kroku (wyżarzanie kosinusowe). A inne robią to poprzez szacowanie pędów (momentów) gradientów (rodzina algorytmów Adam).
 
 Kolejną sprawą jest zapobieganie przesadnemu dopasowaniu modelu do danych treningowych. Objawia się to tym, że dla danych treningowych model bardzo trafnie przewiduje wyniki, zaś dla danych spoza tego zbioru model cechuje się gorszą dokładnością, która w skrajnych sytuacjach będzie mniej lub bardziej podobna do zgadywania. W terminologii, która bardzo wiele zawdzięcza światu anglosaskiemu, nazywa się to **overfittingiem**. O sposobach na zapobieganie mu [piszę tutaj](#32-batch-czy-mini-batch-czyli-o-dzieleniu-danych-treningowych).
 
@@ -530,6 +540,8 @@ SHAP, LIME, wykresy PDP, ICE, testy ANOVA jedno i dwukierunkowe
 ### 3.6 Architektury modeli STT i TTS
 
 CNN, RNN i Transformery
+
+### 3.7 Antykruchość, czyli lekcja dla każdego analityka
 
 ## 4 Bibliografia
 
