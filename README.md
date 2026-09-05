@@ -449,6 +449,8 @@ Jednakże, aby wykorzystać pełen potencjał tej metody, należy próbować ró
 
 Hold-out polega na dzieleniu zbioru danych na podzbiór treningowy i testowy. W praktyce często wyznacza się też osobny zbiór walidacyjny, który pozwala na bieżąco oceniać postęp treningu po każdej epoce.
 
+Dzięki temu podziałowi można w banalny sposób ocenić, czy model jest nadmiernie dopasowany, czy nie. Wystarczy spojrzeć na metryki precyzji
+
 #### Walidacja krzyżowa
 
 w przypadku większych modeli może okazać się zbyt kosztowna.
@@ -498,7 +500,11 @@ CNN, RNN i Transformery
 
 ### A - K
 
-batch - wsad, partia, porcja (zwykle danych treningowych) \
-konwergencja - zbieżność, podobieństwo \
+Batch - wsad, partia, porcja (zwykle danych treningowych) \
+Celność - opisuje bliskość wyniku do wskazanego celu \
+Dokładność - patrz Celność \
+Konwergencja - zbieżność, podobieństwo
 
 ### J - Z
+
+Precyzja - opisuje miarę rozrzutu wyników. Wysoka precyzja oznacza niewielki rozrzut i vice versa.
