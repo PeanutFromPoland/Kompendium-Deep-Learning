@@ -350,7 +350,7 @@ Można to uprawdopodobnić na wiele sposobów. Na przykład podczas inicjalizacj
 
 Zamiast algorytmu stochastycznego spadku gradientowego stosuje się inne, które na różnych etapach treningu promują bardziej eksplorację, niż eksploatację przestrzeni rozwiązań i vice versa. Robią to poprzez modyfikację współczynnika $\lambda$, który odpowiada za wielkość kroku (wyżarzanie kosinusowe). Robią to poprzez szacowanie pędów (momentów) gradientów (rodzina algorytmów Adam).
 
-Kolejną sprawą jest zapobieganie przesadnemu dopasowaniu modelu do danych treningowych. Objawia się to tym, że dla danych treningowych model bardzo trafnie przewiduje wyniki, zaś dla danych spoza tego zbioru model cechuje się gorszą precyzją, która w skrajnych sytuacjach będzie mniej lub bardziej podobna do zgadywania. W terminologii, która bardzo wiele zawdzięcza światu anglosaskiemu, nazywa się to **overfittingiem**. O sposobach na zapobieganie mu [piszę tutaj](#32-batch-czy-mini-batch-czyli-o-dzieleniu-danych-treningowych).
+Kolejną sprawą jest zapobieganie przesadnemu dopasowaniu modelu do danych treningowych. Objawia się to tym, że dla danych treningowych model bardzo trafnie przewiduje wyniki, zaś dla danych spoza tego zbioru model cechuje się gorszą dokładnością, która w skrajnych sytuacjach będzie mniej lub bardziej podobna do zgadywania. W terminologii, która bardzo wiele zawdzięcza światu anglosaskiemu, nazywa się to **overfittingiem**. O sposobach na zapobieganie mu [piszę tutaj](#32-batch-czy-mini-batch-czyli-o-dzieleniu-danych-treningowych).
 
 ### 1.5 Zastosowania
 
@@ -449,7 +449,7 @@ Jednakże, aby wykorzystać pełen potencjał tej metody, należy próbować ró
 
 Hold-out polega na dzieleniu zbioru danych na podzbiór treningowy i testowy. W praktyce często wyznacza się też osobny zbiór walidacyjny, który pozwala na bieżąco oceniać postęp treningu po każdej epoce.
 
-Dzięki temu podziałowi można w banalny sposób ocenić, czy model jest nadmiernie dopasowany, czy nie. Wystarczy spojrzeć na metryki precyzji
+Dzięki temu podziałowi można w banalny sposób ocenić, czy model jest nadmiernie dopasowany, czy nie. Wystarczy spojrzeć na metryki dokładności i stwierdzić, czy dla zbioru testowego są one istotnie mniejsze, niż dla zbioru treningowego. Jeżeli tak, to model jest nadmiernie dopasowany. Jeżeli nie, to oznacza, że model nauczył się generalizacji.
 
 #### Walidacja krzyżowa
 
@@ -500,11 +500,20 @@ CNN, RNN i Transformery
 
 ### A - K
 
-Batch - wsad, partia, porcja (zwykle danych treningowych) \
-Celność - opisuje bliskość wyniku do wskazanego celu \
-Dokładność - patrz Celność \
-Konwergencja - zbieżność, podobieństwo
+Batch - wsad, partia, porcja (zwykle danych treningowych);
+
+Celność - opisuje bliskość wyniku do wskazanego celu;
+
+Dokładność - patrz: Celność;
+
+Ex ante - łac. "przed faktem". Dotyczy właściwości modelu ocenianych na podstawie danych treningowych;
+
+Ex post - łac. "po fakcie". Dotyczy właściwości modelu ocenianych na podstawie danych testowych;
+
+Generalizacja - zdolność modelu do poprawnego przewidywania wyników dla sytuacji, w których nie był trenowany;
+
+Konwergencja - zbieżność, podobieństwo;
 
 ### J - Z
 
-Precyzja - opisuje miarę rozrzutu wyników. Wysoka precyzja oznacza niewielki rozrzut i vice versa.
+Precyzja - opisuje miarę rozrzutu wyników. Wysoka precyzja oznacza niewielki rozrzut i vice versa;
