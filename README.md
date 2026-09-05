@@ -53,13 +53,12 @@ Release v0.2.0
       - [Eliminacja zmiennych nieistotnych](#eliminacja-zmiennych-nieistotnych)
       - [Wzbogacanie danych treningowych (data augmentation)](#wzbogacanie-danych-treningowych-data-augmentation)
       - [Ograniczanie złożoności modelu](#ograniczanie-złożoności-modelu)
+      - [Wczesne kończenie treningu](#wczesne-kończenie-treningu)
     - [3.4 XAI](#34-xai)
     - [3.5 Metody treningu z niewielką lub żadną ilością danych](#35-metody-treningu-z-niewielką-lub-żadną-ilością-danych)
     - [3.6 Architektury modeli STT i TTS](#36-architektury-modeli-stt-i-tts)
   - [4 Bibliografia](#4-bibliografia)
   - [5 Słownik pojęć technicznych i anglojęzycznych](#5-słownik-pojęć-technicznych-i-anglojęzycznych)
-    - [A - K](#a---k)
-    - [J - Z](#j---z)
   
 ---
 
@@ -449,27 +448,78 @@ Jednakże, aby wykorzystać pełen potencjał tej metody, należy próbować ró
 
 Hold-out polega na dzieleniu zbioru danych na podzbiór treningowy i testowy. W praktyce często wyznacza się też osobny zbiór walidacyjny, który pozwala na bieżąco oceniać postęp treningu po każdej epoce.
 
-Dzięki temu podziałowi można w banalny sposób ocenić, czy model jest nadmiernie dopasowany, czy nie. Wystarczy spojrzeć na metryki dokładności i stwierdzić, czy dla zbioru testowego są one istotnie mniejsze, niż dla zbioru treningowego. Jeżeli tak, to model jest nadmiernie dopasowany. Jeżeli nie, to oznacza, że model nauczył się generalizacji.
+Dzięki temu podziałowi można w banalny sposób ocenić, czy model jest nadmiernie dopasowany, czy nie. Wystarczy spojrzeć na metryki dokładności i stwierdzić, czy dla zbioru testowego są one istotnie mniejsze, niż dla zbioru treningowego. Jeżeli tak, to model jest nadmiernie dopasowany. Jeżeli nie, to oznacza, że model umie generalizować.
+
+Należy przy tym uważać na *wycieki danych*, czyli sytuacje gdzie do danych treningowych dostają się informacje, które w nieuprawniony sposób ułatwiają modelowi przewidywania czyli m.in. obserwacje ze zbioru testowego, charakterystyczne sygnatury na zdjęciach lub w nagraniach, które pasują do prawidłowych etykiet
 
 #### Walidacja krzyżowa
 
-w przypadku większych modeli może okazać się zbyt kosztowna.
+Polega ona na dzieleniu danych na równe fragmenty, zwykle 3, 5 lub więcej i trenowaniu modelu na różnych kombinacjach tych fragmentów. Do testowania używa się jednego fragmentu, a do treningu pozostałych. Proces wybierania i trenowania na kolejnych kombinacjach fragmentów jest powtarzany tyle razy, ile jest fragmentów (skąd pochodzi jego nazwa).
+
+Dzięki temu można dobrać taką konfigurację danych treningowych, która buduje najlepszy model ze wszystkich dostępnych konfiguracji. Niestety, dla modeli opartych o głębokie sieci neuronowe jest ona zbyt kosztowna.
 
 #### Regularyzacja
 
-- Regularyzacja L1 (lasso) i L2 (ridge);
+Regularyzacja to technika polegające na obciążaniu funkcji straty dodatkowymi karami za wagi, które zwiększają złożoność modelu i utrudniają generalizację. Wyróżnia się dwie techniki:
+
+- L1 (tzw. lasso)
+- L2 (tzw. ridge)
+
+Pierwsza technika dodaje do funkcji kary sumę ***wartości bezwzględnych*** każdej wagi zmodyfikowaną o hiperparametr $\lambda$. Dzięki temu można wyzerować najmniej znaczące wagi, co istotnie upraszcza model. Metoda ta jest odporna na obserwacje odstające (outlier'y).
+
+Druga technika polega na dodaniu sumy kwadratów wag zmodyfikowaną też o hiperparametr $\lambda$. Dodanie jej sprawia, że wagi modelu będą oscylowały wokół zera, ale go nie osiągną. Technika ta pozwala modelowi nauczyć się złożonych schematów, które pozwolą poprawnie przewidywać wynik. Niestety, ta metoda nie jest odporna na obserwacje odstające.
+
+W praktyce najczęściej stosuje się metodę L2, ale nic nie stoi na przeszkodzie, aby stosować je jednocześnie.
 
 #### Dropout
 
-- Dropout;
+Polega na losowym zerowaniu wag podczas treningu we wskazanej warstwie lub warstwach. Sterowanie polega na określeniu prawdopodobieństwa, z jakim dowolna waga zostanie wyzerowana po propagacji w tył. Dzięki temu model staje się prostszy, lecz na osiągnięcie pełnej konwergencji model potrzebuje więcej epok.
 
 #### Eliminacja zmiennych nieistotnych
 
+Podczas pracy analitycznej nie wszystkie zmienne są potrzebne. Aby móc wskazać, które są nieistotne, można posłużyć się różnymi sposobami. Poniżej wymieniam te najważniejsze:
+
+- Macierz korelacji
+- Analiza wariancji
+- Dwuczynnikowa analiza wariancji (ANOVA)
+- Test niezależności Chi-kwadrat
+- Eliminacja wsteczna
+
+Macierz korelacji pozwala określić, które zmienne są nieskorelowane ze sobą, a które są zbyt mocno skorelowane. Jeżeli dwie zmienne, które mają określać zmienną zależną, są ze sobą silnie skorelowane, to należy odrzucić jedną z nich. Jeżeli któraś ze zmiennych jest najsłabiej skorelowana ze zmienną zależną, to tą też należy odrzucić.
+
+Analiza wariancji jest wglądem w to, czy zmienna ma za małą wariancję. Jest to bardzo ważne, bowiem bez odpowiednio dużej wariancji nie ma mowy o poprawnej predykcji. Wynika to pośrednio z twierdzenia FWL, gdyż zmienna będąca praktycznie stałowartościowa stworzy model regresji o idealnej współliniowości ze zmienną zależną. Z matematycznego punktu widzenia zerowa wariancja uniemożliwia stworzenie współczynnika kierunkowego $\beta$, a numerycznie wartość wariancji oscylującej wokół zera komplikuje budowę modelu.
+
+$$\beta = \frac{Cov(X_1,X_2)}{Var(X_1)}$$
+
+Dwuczynnikowa analiza wariancji jest testem pozwalającym stwierdzić, czy zmienna numeryczna ma wpływ na zmienną objaśnianą. Zwraca ona wartość testu i wartość p (*p-value*). Istotność zmiennej określa się na podstawie tego, czy wartość p nie przekracza progu 0.05. W zasadzie to są trzy progi:
+
+- 0.001 - poniżej tego progu zmienna ma duży wpływ na zmienną objaśnianą;
+- 0.01 - poniżej tego progu zmienna ma co najmniej umiarkowany wpływ;
+- 0.05 - poniżej tego progu zmienna ma co najmniej istotny wpływ;
+
+Test ANOVA pozwala też badać wpływ zmiennej kategorialnej, o ile ma co najmniej trzy kategorie. Jeżeli zmienna kategorialna nie ma rozkładu normalnego, to stosuje się test Kruskala-Wallisa dla kategorii niezależnych, a dla zależnych test Friedmana.
+
+Poniżej tej liczby stosuje się test t-Studenta. Jeżeli zmienna objaśniająca nie ma rozkładu normalnego to stosuje się test Manna-Whiteneya dla kategorii niezależnych lub test Wilcoxona dla kategorii zależnych od siebie.
+
+Test niezależności Chi-kwadrat sprawdza, czy zmienna kategorialna ma wpływ na zmienną objaśnianą (która też jest kategorialna). Tak samo jak w teście ANOVA bada się jego istotność i porównuje się ww. progami. Należy przedtem sprawdzić, czy kategorie w zmiennych są zależne od siebie. Jeśli tak, to należy zaniechać używania tego testu i użyć takiego, który będzie pasować.
+
+Jeżeli zmienna objaśniająca jest numeryczna, a objaśniana jest zmienną kategorialną, to dla nich buduje się model regresji logistycznej i bada się jego metryki.
+
+Eliminacja wsteczna jest metodą, która polega na budowaniu modelu, sprawdzaniu metryk i iteracyjnym odrzucaniu najmniej istotnych zmiennych.
+
 #### Wzbogacanie danych treningowych (data augmentation)
 
-wprowadzanie do zbioru danych treningowych artefaktów, które w praktycznym zastosowaniu mogłyby zaburzać pracę, ale podczas treningu uodporniają model na anomalie otrzymane na wejściu. Sprowadza się to do dodawania mniej lub bardziej regularnych szumów, zakrywania części obrazu i innych manipulacji;
+Ta technika polega na wprowadzaniu do zbioru danych treningowych artefaktów, które w praktycznym zastosowaniu mogłyby zaburzać pracę, ale podczas treningu uodporniają model na anomalie otrzymane na wejściu. Sprowadza się to do dodawania mniej lub bardziej regularnych szumów do danych treningowych, zakrywania części obrazu i innych manipulacji na danych, które mogą być przypadkowe lub zamierzone przez stronę atakującą dany model.
+
+Technika ta jest szeroko stosowana w modelach wizji komputerowej, gdyż pozwala ona uodpornić model na zakłócenia pracy kamery oraz poprawić zdolność modelu do generalizacji.
 
 #### Ograniczanie złożoności modelu
+
+Polega to na redukcji neuronów w określonych warstwach lub usuwaniu całych warstw w sieci neuronowej. Ma to na celu zmniejszyć złożoność modelu i poprawić wyniki inferencji.
+
+#### Wczesne kończenie treningu
+
+Polega to na kończeniu treningu wtedy, gdy metryki wskazują na to, że dalszy trening nie umożliwi istotnego poprawienia wag modelu, a jednocześnie dalszy trening spowoduje nadmierne dopasowanie do danych treningowych.
 
 ### 3.4 XAI
 
@@ -495,25 +545,50 @@ CNN, RNN i Transformery
 10. [Wel] Illustrated guide to AI. Volume I. The Welch Labs. 2025
 11. A. W. Trask. Zrozumieć głębokie uczenie. Wydawnictwo PWN. Warszawa 2019. ISBN: 978-83-01-20782-3
 12. L. Bhuva. Mini-Batch Gradient Descent: A Comprehensive Guide, [online]. Dostęp w Internecie: <https://medium.com/@lomashbhuva/mini-batch-gradient-descent-a-comprehensive-guide-ba27a6dc4863>. [dostęp: 31.08.2026]
+13. Książka o analizie danych
 
 ## 5 Słownik pojęć technicznych i anglojęzycznych
 
-### A - K
+**Batch** - wsad, partia, porcja (zwykle danych treningowych);
 
-Batch - wsad, partia, porcja (zwykle danych treningowych);
+**Celność** - opisuje bliskość wyniku do wskazanego celu;
 
-Celność - opisuje bliskość wyniku do wskazanego celu;
+**Dokładność** - patrz: **Celność**;
 
-Dokładność - patrz: Celność;
+**Etykieta** - wartość zmiennej kategorialnej
 
-Ex ante - łac. "przed faktem". Dotyczy właściwości modelu ocenianych na podstawie danych treningowych;
+**Ex ante** - łac. "przed faktem". Dotyczy właściwości modelu ocenianych na podstawie danych treningowych;
 
-Ex post - łac. "po fakcie". Dotyczy właściwości modelu ocenianych na podstawie danych testowych;
+**Ex post** - łac. "po fakcie". Dotyczy właściwości modelu ocenianych na podstawie danych testowych;
 
-Generalizacja - zdolność modelu do poprawnego przewidywania wyników dla sytuacji, w których nie był trenowany;
+**Funkcja kosztu** - funkcja, która zwraca miarę odległości przewidywań modelu od poprawnych wyników;
 
-Konwergencja - zbieżność, podobieństwo;
+**Funkcja straty** - patrz: **Funkcja kosztu**;
 
-### J - Z
+**Generalizacja** - zdolność modelu do poprawnego przewidywania wyników dla sytuacji, w których nie był trenowany dzięki redukcji złożoności i upraszczaniu;
 
-Precyzja - opisuje miarę rozrzutu wyników. Wysoka precyzja oznacza niewielki rozrzut i vice versa;
+**Inferencja** - czas od wprowadzenia danych do modelu do uzyskania prognoz;
+
+**Konwergencja** - zbieżność, podobieństwo;
+
+**Logity** - surowe wartości uzyskiwane na wyjściu modelu. Im większe, tym większe prawdopodobieństwo przynależności obserwacji do poszczególnych kategorii zmiennej objaśnianej. Dziedziną logitów jest zbiór liczb rzeczywistych;
+
+**Precyzja** - opisuje miarę rozrzutu wyników. Wysoka precyzja oznacza niewielki rozrzut i vice versa;
+
+**Obserwacja** - pojedynczy zestaw wartości zmiennych objaśniających;
+
+**Predykcja** - zbiór prawdopodobieństw przynależności do kategorii zmiennej zależnej uzyskany z modelu lub oszacowanie wartości tejże zmiennej, jeżeli jest numeryczna;
+
+**Prognoza** - patrz: **Predykcja**;
+
+**Zmienna ilościowa** - zmienna, którą reprezentuje liczba;
+
+**Zmienna jakościowa** - zmienna, którą reprezentuje coś innego niż liczba np. słowo, litera;
+
+**Zmienna kategorialna** - zmienna, która opisuje przynależność do pewnej grupy lub kategorii. Dzieli się je na nominalne (kategorie są równoważne) i porządkowe (kategorie układają się w porządku hierarchicznym);
+
+**Zmienna objaśniająca** - zmienna, która ma wpływ na **zmienną objaśnianą**. Może być argumentem dla funkcji zwracającej wartości zmiennej objaśnianej lub wejściem modelu;
+
+**Zmienna objaśniana** - zmienna, którą ma odzwierciedlać dana funkcja lub którą ma naśladować dany model;
+
+**Zmienna zależna** - patrz: **Zmienna objaśniana**
