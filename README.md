@@ -94,6 +94,7 @@ Ta *pewna operacja* odróżnia perceptron od zwyczajnych funkcji liniowych. Bez 
 
 ### 1.2 Funkcje aktywacji
 
+![image](imgs/perceptron.png)
 Funkcja aktywacji jest funkcją, która dla wartości funkcji liniowej zwraca nieliniowy sygnał na wyjście. Umożliwia ona odwzorowywanie nieliniowych zależności pomiędzy zmiennymi zależnymi (reprezentowanymi przez neurony warstwy końcowej), a zmiennymi wejściowymi (reprezentowanymi przez neurony w warstwie wejściowej). Dzięki temu ANN-y mogą uczyć się przewidywania nieliniowych zależności.
 
 #### W przeszłości
@@ -103,13 +104,13 @@ W przeszłości używano funkcji trygonometrycznych takich jak funkcja sigmoidal
 1. Wykazują tendencję do nasycania się, co objawia się tym, że nieważne czy wejście ma dużą wartość, czy większą to zwraca ona bardzo małą pochodną, co straszliwie spowalnia trening, co można zauważyć na dołączonych ilustracjach;
 2. Niewielkie wartości pochodnych dążące do 0 są piętą achillesową dla komputerów. Błędy numeryczne kumulują się wraz z obliczaniem kolejnych warstw, co utrudnia sprawne korygowanie wag.
 
-![image](imgs/Zrzut%20ekranu%202026-08-27%20132559.png)
+![image](imgs/tanh.png)
 Legenda:
 
 - czerwony kolor: funkcja tangensa hiperbolicznego;
 - żółty kolor: pochodna funkcji tangensa hiperbolicznego;
 
-![image](imgs/Zrzut%20ekranu%202026-08-27%20133044.png)
+![image](imgs/sigmoid.png)
 Legenda:
 
 - fioletowy kolor: funkcja sigmoidalna;
@@ -185,6 +186,9 @@ $$
 
 *- funkcje te są jedynymi dozwolonymi na warstwach wyjściowych
 
+
+![image](imgs/relu.png)
+
 ### 1.3 Wielowarstwowy perceptron - sieć głęboka
 
 Sieci zbudowane są z wielu takich perceptronów ułożonych równolegle ze sobą tworząc warstwy sieci. Warstwy sieci z kolei są połączone szeregowo, co czyni je siecią głęboką. Najprostszą postacią sieci głębokiej jest perceptron wielowarstwowy, w skrócie MLP (Multi Layer Perceptron). W dalszej części kompendium pojawi się sieć sprzężenia do przodu (Feedforward Neural Network), która jest w zasadzie tym samym, z tym że nazwa nawiązuje do tego, jak model dokonuje obliczeń.
@@ -206,6 +210,8 @@ Liczba neuronów w warstwie wyjściowej odpowiada liczbie klas szacowanej zmienn
 #### Propagacja w przód
 
 Propagacja w przód jest mechanizmem, który pozwala uzyskiwać prognozy po wprowadzeniu do modelu danych wejściowych. Jeśliby spojrzeć na model *z lotu ptaka*, to liczby wprowadzone na wejście są przekazywane DO PRZODU warstwa po warstwie. Sygnał nie jest propagowany ani w kierunku tych samych neuronów w warstwie, ani do tyłu. W innych architekturach np. sieciach rekurencyjnych lub rezydualnych sygnał może być przekazywany od neuronu do neuronu w obrębie warstwy lub może je pomijać.
+
+![image](imgs/forward%20passing.png)
 
 Warstwa wejścia dostarcza danych liczbowych do neuronów pierwszej warstwy ukrytej. Każdy taki neuron z osobna w warstwie ma własny zestaw wag oraz wyraz wolny, zwany *biasem*, którymi traktuje dane wejściowe. Suma iloczynu skalarnego wektora wag i wektora danych wejściowych oraz wyrazu wolnego po zastosowaniu funkcji aktywacji stanowi sygnał wyjściowy danego neuronu. Sygnał ten następnie jest przekazywany do następnej warstwy oraz ich neuronów i traktowany w ten sam sposób.
 
@@ -297,41 +303,48 @@ $O=1$
 
 Dla neuronu wyjściowego (warstwy wyjściowej) wzór na zmianę wag połączeń kończących się w nim jest następujący:
 
-$
+$$
 \delta_{3,1}^{2,k}=e_{3,1} \cdot \frac{d}{dx}f(n_{3,1})
-$
+$$
 
-$
+$$
 w_{3,1}^{2,k} = w_{3,1}^{2,k} + n_{3,1}^T \cdot \delta_{3,1}^{2,k} \cdot \lambda
-$
+$$
 
-$
+$$
 b_{3,1} = b_{3,1} + \sum_{k=1}^M \delta_{3,1}^{2,k}\\
-$
+$$
 
-$k=\overline{1,M}$
+$$k=\overline{1,M}$$
+
+
+![image](imgs/backpropagation%201.png)
 
 Dla warstwy ukrytej zmiany wag oblicza się w następujący sposób:
 
-$
+$$
 \delta_{2,l}^{1,k} = w_{2,l}^{1,k} \cdot \frac{d}{dx} f(n_{1,l}) \\
-$
+$$
 
-$
+$$
 w_{2,l}^{1,k} = w_{2,l}^{1,k} + n_{1,l}^T \cdot \delta_{2,l}^{1,k}
-$
+$$
 
-$
+$$
 b_{1,l} = b_{1,l} + \sum_{k=1}^M \delta_{2,l}^{1,k}\\
-$
+$$
 
-$k,l=\overline{1,M}$
+$$k,l=\overline{1,M}$$
 
+![image](imgs/backpropagation%202.png)
 Współczynnik uczenia ustawia się po to, aby parametry miały szansę odnaleźć lepsze optimum lokalne. Bez tego model natychmiast wpadnie w najbliższe optimum lokalne, które najczęściej będzie ono niesatysfakcjonujące.
 
 #### Interpretacje sieci głębokich
 
 Pierwszą interpretacją, jaką proponuje R. Hurbans w [RHu] jest to, że każda kolejna warstwa ANN tworzy coraz bardziej korelujące dane, które wreszcie stają się w pełni skorelowane na warstwie wyjściowej.
+
+
+![image](imgs/grupowanie%20danych%20w%20klasy.png)
 
 Drugą interpretacją zaproponowaną w [Wel] jest to, że sieć neuronową odwzorowuje mapa regionów decyzyjnych oddzielonych granicami decyzyjnymi. Im więcej neuronów, tym więcej granic i obszarów, lecz im więcej warstw w sieci, tym więcej takich obszarów i tym mniejszy koszt obliczeniowy. Dobrze oddaje to wzór na maksymalną liczbę regionów:
 
@@ -349,17 +362,24 @@ $K$ - liczba warstw pośrednich
 
 W tym ujęciu sieci trzywarstwowe zawierające tylko jedną warstwę ukrytą są ukazane jako nieefektywne, ponieważ mają one mniejszą elastyczność wyrażaną liczbą regionów. Ze wzoru można wywnioskować, że przyrost liczby regionów jest wielomianowy, natomiast ten sam przyrost wywołany zwiększeniem liczby warstw jest wykładniczy.
 
+![image](imgs/regiony%20decyzyjne.png)
 Ogólnie rzecz biorąc, ciężko jest stworzyć czytelną i zrozumiałą interpretację modelu dla każdego problemu. Każdy neuron w sieci wykonuje swoje zadanie, które trudno jest opisać jednoznacznie i precyzyjnie. Ale są metody, które pomagają zrozumieć to, jak dana sieć neuronowa dochodzi do rozwiązań. Nimi zajmuje się osobna dziedzina badań - XAI (Explainable AI), dzięki której zyskujemy coraz lepszy wgląd w proces rozumowania systemów opartych na modelach AI, na podstawie którego można oceniać bezpieczeństwo i słuszność w podejściu tych modeli.
 
 ### 1.4 Istota treningu ANN
 
 Właściwe ustawienie wag w sieci głębokiej polega na tym, że dla danego zestawu danych treningowych sieć głęboka musi zwracać jak najmniejszy błąd na wyjściu. Algorytm propagacji wstecz działa na zasadzie spadku gradientowego. Niestety (dla architektów sieci głębokich) albo na szczęście (bowiem taka jest rzeczywistość) świat jest bardziej skomplikowany niż funkcja liniowa. W przestrzeni rozwiązań dopuszczalnych są rozwiązania, które zwracają zaledwie minima lokalne funkcji błędu, ale jest też co najmniej jedno rozwiązanie, które zwraca minimum globalne. Gradienty mogą zwracać wartości, które niekoniecznie kierują na minimum globalne, lecz na minimum lokalne, co bez dwóch zdań utrudnia trening. Zatem podczas treningu trzeba zwracać uwagę na to, aby kierunek optymalizacji był z jak największym prawdopodobieństwem zgodny z położeniem minimum globalnego, ewentualnie położeniem rozwiązania w granicach dopuszczalnego błędu względem minimum globalnego.
 
+
+![image](imgs/minimalizacja.png)
+
 Można to uprawdopodobnić na wiele sposobów. Na przykład podczas inicjalizacji wag losuje się kilka lub więcej zestawów, a następnie dokonuje się selekcji takiego zestawu, który zwraca najmniejszy błąd.
 
 Klasyczny algorytm stochastycznego spadku gradientowego wzbogaca się innymi metodami, które na różnych etapach treningu promują bardziej eksplorację, niż eksploatację przestrzeni rozwiązań i vice versa. Jedne metody robią to poprzez modyfikację współczynnika $\lambda$, który odpowiada za wielkość kroku (wyżarzanie kosinusowe). A inne robią to poprzez szacowanie pędów (momentów) gradientów (rodzina algorytmów Adam).
 
+![image](imgs/eksploracja%20vs%20eksploatacja.png)
 Kolejną sprawą jest zapobieganie przesadnemu dopasowaniu modelu do danych treningowych. Objawia się to tym, że dla danych treningowych model bardzo trafnie przewiduje wyniki, zaś dla danych spoza tego zbioru model cechuje się gorszą dokładnością, która w skrajnych sytuacjach będzie mniej lub bardziej podobna do zgadywania. W terminologii, która bardzo wiele zawdzięcza światu anglosaskiemu, nazywa się to **overfittingiem**. O sposobach na zapobieganie mu [piszę tutaj](#32-batch-czy-mini-batch-czyli-o-dzieleniu-danych-treningowych).
+
+![image](imgs/overfitting.png)
 
 ### 1.5 Zastosowania
 
@@ -413,6 +433,9 @@ Pytania, na które poznasz odpowiedź w tym rozdziale.
 - Jak komputer potrafi rozpoznać mowę człowieka?
 
 ### 3.1 Optimizery
+
+
+![image](imgs/metody%20optymalizacji.png)
 
 #### Stochastyczna optymalizacja gradientowa (SGD)
 
