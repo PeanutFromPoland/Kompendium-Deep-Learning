@@ -286,7 +286,7 @@ $I$ - liczba neuronów w warstwie wejścia \
 $O$ - liczba neuronów w warstwie wyjścia
 
 $w_{j,l}^{i,k}$, $i\lt j$ - waga pomiędzy $k$-tym neuronem $i$-tej warstwy, a $l$-tym neuronem $j$-tej warstwy\
-$b_{i,j}$ - szum (bias) w $j$-tym neuronie $i$-tej warstwy\
+$b_{i,j}$ - wyraz wolny (bias) w $j$-tym neuronie $i$-tej warstwy\
 $n_{i,j}$ - wartość sygnału neuronu w $j$-tym neuronie w $i$-tej warstwie
 
 $\delta_{j,l}^{i,k}$, $i\lt j$ - zmiana wagi pomiędzy $k$-tym neuronem $i$-tej warstwy, a $l$-tym neuronem $j$-tej warstwy\
@@ -500,9 +500,20 @@ Regularyzacja to technika polegające na obciążaniu funkcji straty dodatkowymi
 
 Pierwsza technika dodaje do funkcji kary sumę ***wartości bezwzględnych*** każdej wagi zmodyfikowaną o hiperparametr $\lambda$. Dzięki temu można wyzerować najmniej znaczące wagi, co istotnie upraszcza model. Metoda ta jest odporna na obserwacje odstające (outlier'y).
 
+$$
+f'_{kara}(w) = f_{kara}(w)+\lambda \cdot \sum{|w_{i}|}
+$$
+
 Druga technika polega na dodaniu sumy kwadratów wag zmodyfikowaną też o hiperparametr $\lambda$. Dodanie jej sprawia, że wagi modelu będą oscylowały wokół zera, ale go nie osiągną. Technika ta pozwala modelowi nauczyć się złożonych schematów, które pozwolą poprawnie przewidywać wynik. Niestety, ta metoda nie jest odporna na obserwacje odstające.
 
+$$
+f'_{kara}(w) = f_{kara}(w)+\lambda \cdot \sum{w_{i}^2}
+$$
+
 W praktyce najczęściej stosuje się metodę L2, ale nic nie stoi na przeszkodzie, aby stosować je jednocześnie.
+$$
+f'_{kara}(w) = f_{kara}(w)+\lambda_1 \cdot \sum{|w_{i}|}+\lambda_2 \cdot \sum{w_{i}^2}
+$$
 
 #### Dropout
 
