@@ -17,19 +17,19 @@
     - [Nowości](#nowości)
   - [Spis treści](#spis-treści)
   - [1 Wprowadzenie](#1-wprowadzenie)
-    - [1.1 Geneza](#11-geneza)
+    - [1.1 Inspiracja](#11-inspiracja)
     - [1.2 Perceptron](#12-perceptron)
-    - [1.2 Funkcje aktywacji](#12-funkcje-aktywacji)
+    - [1.3 Funkcje aktywacji](#13-funkcje-aktywacji)
       - [W przeszłości](#w-przeszłości)
       - [ReLU](#relu)
       - [Lista funkcji aktywacji](#lista-funkcji-aktywacji)
-    - [1.3 Wielowarstwowy perceptron - sieć głęboka](#13-wielowarstwowy-perceptron---sieć-głęboka)
+    - [1.4 Wielowarstwowy perceptron - sieć głęboka](#14-wielowarstwowy-perceptron---sieć-głęboka)
       - [Budowa](#budowa)
       - [Propagacja w przód](#propagacja-w-przód)
       - [Propagacja w tył (Backpropagation)](#propagacja-w-tył-backpropagation)
       - [Interpretacje sieci głębokich](#interpretacje-sieci-głębokich)
-    - [1.4 Istota treningu ANN](#14-istota-treningu-ann)
-    - [1.5 Zastosowania](#15-zastosowania)
+    - [1.5 Istota treningu ANN](#15-istota-treningu-ann)
+    - [1.6 Zastosowania](#16-zastosowania)
   - [2 Architektury ANN](#2-architektury-ann)
     - [2.1 Sieci konwolucyjne (Convolutional Neural Network)](#21-sieci-konwolucyjne-convolutional-neural-network)
     - [2.2 Generatywne Sieci Adwersalne (Generative Adversal Network)](#22-generatywne-sieci-adwersalne-generative-adversal-network)
@@ -75,7 +75,7 @@
 
 ## 1 Wprowadzenie
 
-Rozdział ten opowiada o istocie i zasadzie działania sztucznych sieci neuronowych (artificial neural network - ANN). Opisuje ich genezę, budowę, zastosowania we współczesnym świecie i mechanizmy, które zachodzą zarówno podczas trenowania, jak i ewaluacji modeli opartych o sztuczne sieci neuronowe.
+Rozdział ten opowiada o istocie i zasadzie działania sztucznych sieci neuronowych (artificial neural network - ANN). Opisuje ich genezę, budowę, zastosowania we współczesnym świecie i mechanizmy, które zachodzą zarówno podczas trenowania, jak i inferencji modeli opartych o sztuczne sieci neuronowe.
 
 Pytania, na które poznasz odpowiedź w tym rozdziale.
 
@@ -84,35 +84,32 @@ Pytania, na które poznasz odpowiedź w tym rozdziale.
 - Na czym polega trudność w wytrenowaniu sieci neuronowej?
 - Jak można interpretować budowę głębokich sieci?
 
-### 1.1 Geneza
+### 1.1 Inspiracja
 
 Bezpośrednią inspiracją dla powstania sztucznych sieci neuronowych (które będę skrótowo odtąd nazywać sieciami neuronowymi lub głębokimi sieciami neuronowymi) jest budowa neuronów w ludzkim mózgu.
 
 ![image](imgs/neuron.png)
 
-Neurony w mózgu składają się z dendrytów, jądra komórkowego, ciała komórkowego, aksonu i synaps. Dendrydy otrzymują sygnały z sąsiednich neuronów i przekazują je do ciała i jądra komórkowego modyfikującego sygnał. Akson przekazuje nowy sygnał do synaps podłączonych do dendrydów innych neuronów. A dalej odbywa się ten sam proces.
-
-Sygnały w mózgu przechodzą między neuronami, a w każdym z nich poddawane są indywidualnym procesom transformacji.
+Neurony w mózgu składają się z dendrytów, jądra komórkowego, ciała komórkowego, aksonu i synaps. Dendrydy otrzymują sygnały z sąsiednich neuronów i przekazują je do ciała i jądra komórkowego. Akson przekazuje nowy sygnał do synaps podłączonych do dendrydów innych neuronów. A dalej odbywa się ten sam proces. Sygnały w mózgu przechodzą między neuronami, a w każdym z nich poddawane są indywidualnym procesom transformacji. Z tej obserwacji natury wynikła inspiracja do stworzenia matematycznego modelu neuronu, który musiał jednak przejść wiele uproszczeń. Jakich? Niestety, nie dysponuję dyplomem z neurobiologii, więc pozostawię to do własnych poszukiwań. 
 
 ### 1.2 Perceptron
 
-Twórcy koncepcji ANN zaproponowali, aby odwzorować matematycznie procesy zachodzące w mózgu. W modelu matematycznym procesy transformacji mają polegać na obliczaniu wartości funkcji liniowej poddanej *pewnej operacji* wprowadzającej nieliniowość. Funkcja ta ma mieć tyle samo zmiennych, co wejść do danego neuronu plus wyraz wolny zwany w terminologii uczenia maszynowego *bias*'em.
-
-Tak zbudowany neuron nazywamy perceptronem.
+Pierwszymi byli neurofizjolog Warren McCulloch i logik Walter Pitts, którzy w 1943 roku zaproponowali matematyczny model neuronu zwracający zera i jedynki. 15 lat później tę koncepcję dopracował i przedstawił Frank Rosenblatt tworząc perceptron. Perceptron to sztuczny neuron, który oblicza wartość funkcji liniowej, a następnie poddaje ją *pewnej operacji* wprowadzającej nieliniowość. Perceptron ma tyle wejść, co zmiennych w funkcji liniowej plus wyraz wolny zwany w terminologii uczenia maszynowego *bias*'em.
 
 Ta *pewna operacja* odróżnia perceptron od zwyczajnych funkcji liniowych. Bez niej sieci głębokie dałoby się uprościć do funkcji liniowych i nie miałyby żadnego zastosowania. I jest nią funkcja aktywacji.
 
-### 1.2 Funkcje aktywacji
+### 1.3 Funkcje aktywacji
 
 ![image](imgs/perceptron.png)
 Funkcja aktywacji jest funkcją, która dla wartości funkcji liniowej zwraca nieliniowy sygnał na wyjście. Umożliwia ona odwzorowywanie nieliniowych zależności pomiędzy zmiennymi zależnymi (reprezentowanymi przez neurony warstwy końcowej), a zmiennymi wejściowymi (reprezentowanymi przez neurony w warstwie wejściowej). Dzięki temu ANN-y mogą uczyć się przewidywania nieliniowych zależności.
 
-#### W przeszłości
+#### Od perceptronu do współczesności
 
-W przeszłości używano funkcji trygonometrycznych takich jak funkcja sigmoidalna i tangens hiperboliczny (tanh). Niestety, badacze zauważyli, że powodują one kilka problemów.
+W przeszłości używano funkcji sigmoidalnych takich jak sigmoid logistyczny i tangens hiperboliczny (tanh). Niestety, badacze zauważyli, że powodują one kilka problemów.
 
 1. Wykazują tendencję do nasycania się, co objawia się tym, że nieważne czy wejście ma dużą wartość, czy większą to zwraca ona bardzo małą pochodną, co straszliwie spowalnia trening, co można zauważyć na dołączonych ilustracjach;
-2. Niewielkie wartości pochodnych dążące do 0 są piętą achillesową dla komputerów. Błędy numeryczne kumulują się wraz z obliczaniem kolejnych warstw, co utrudnia sprawne korygowanie wag.
+2. Wraz z dokładaniem kolejnych warstw w sieci gradient dla tych funkcji drastycznie szybko zanika;
+3. Niewielkie wartości pochodnych dążące do 0 są piętą achillesową dla komputerów. Błędy numeryczne kumulują się wraz z obliczaniem kolejnych warstw, co utrudnia sprawne korygowanie wag.
 
 ![image](imgs/tanh.png)
 Legenda:
@@ -128,7 +125,7 @@ Legenda:
 
 #### ReLU
 
-Aby rozwiązać oba te problemy zaproponowano funkcję ReLU (Rectified Linear Unit). Dla wartości niezerowych jest liniowa, ale dla ujemnych wartości zwraca zero. Dzięki temu nie nasyca się, a ponadto wykazuje się prostą pochodną, która eliminuje problem błędów numerycznych. Oczywiście są różne wariacje na temat funkcji ReLU, ale na początek warto znać kilka podstawowych funkcji aktywacji.
+Aby rozwiązać oba te problemy zaproponowano funkcję ReLU (Rectified Linear Unit). Uwaga. Od tej pory przestajemy mówić stricte o perceptronach, lecz szerzej o sztucznych neuronach. Funkcja ReLU dla wartości niezerowych jest liniowa, ale dla ujemnych wartości zwraca zero. Dzięki temu nie nasyca się dla wartości dodatnich. Oczywiście są różne wariacje na temat funkcji ReLU, które starają się walczyć z nasyceniem dla wartości ujemnych, ale na początek warto znać kilka podstawowych funkcji aktywacji.
 
 #### Lista funkcji aktywacji
 
@@ -194,12 +191,10 @@ $$
 f(x_i)=\sigma(x_i)=\frac{e^{x_i}}{\sum_{j=1}^{n} e^{x_j}}
 $$
 
-*- funkcje te są jedynymi dozwolonymi na warstwach wyjściowych
-
 
 ![image](imgs/relu.png)
 
-### 1.3 Wielowarstwowy perceptron - sieć głęboka
+### 1.4 Wielowarstwowy perceptron - sieć głęboka
 
 Sieci zbudowane są z wielu takich perceptronów ułożonych równolegle ze sobą tworząc warstwy sieci. Warstwy sieci z kolei są połączone szeregowo, co czyni je siecią głęboką. Najprostszą postacią sieci głębokiej jest perceptron wielowarstwowy, w skrócie MLP (Multi Layer Perceptron). W dalszej części kompendium pojawi się sieć sprzężenia do przodu (Feedforward Neural Network), która jest w zasadzie tym samym, z tym że nazwa nawiązuje do tego, jak model dokonuje obliczeń.
 
@@ -211,11 +206,9 @@ Sieć głęboka (MLP) składają się kolejno z:
 - warstw ukrytych (hidden layers)
 - warstwy wyjściowej (output layer)
 
-Warstwa wejściowa ma tyle neuronów, ile zmiennych jest wprowadzanych. Jeżeli któraś ze zmiennych jest kategorialna, należy zrzutować ją albo na liczby, albo na wektor zer i jedynek, co skutkuje oczywiście zwiększeniem liczby potrzebnych neuronów na początku.
+Warstwa wejściowa ma tyle neuronów, ile zmiennych jest wprowadzanych. Jeżeli któraś ze zmiennych jest kategorialna, należy zrzutować ją albo na liczby (jeżeli kategorie są hierarchiczne), albo na wektor zer i jedynek (gdy kategorie są równorzędne), co skutkuje oczywiście zwiększeniem liczby potrzebnych neuronów na początku.
 
-Warstwy ukryte mogą mieć dowolną, niezerową liczbę neuronów. Zwykle pierwsza z nich ma więcej neuronów niż w warstwie wejściowej. O tym jak liczba neuronów może wpływać na zdolność sieci do prognozowania piszę w tym rozdziale o [tutaj](#interpretacje-sieci-głębokich).
-
-Liczba neuronów w warstwie wyjściowej odpowiada liczbie klas szacowanej zmiennej zależnej. Jeżeli zmienna zależna jest ilościowa, to występuje tylko jeden neuron.
+Warstwy ukryte mogą mieć dowolną, niezerową liczbę neuronów. O tym jak liczba neuronów może wpływać na zdolność sieci do prognozowania piszę w tym rozdziale o [tutaj](#interpretacje-sieci-głębokich).
 
 #### Propagacja w przód
 
@@ -226,14 +219,14 @@ Propagacja w przód jest mechanizmem, który pozwala uzyskiwać prognozy po wpro
 Warstwa wejścia dostarcza danych liczbowych do neuronów pierwszej warstwy ukrytej. Każdy taki neuron z osobna w warstwie ma własny zestaw wag oraz wyraz wolny, zwany *biasem*, którymi traktuje dane wejściowe. Suma iloczynu skalarnego wektora wag i wektora danych wejściowych oraz wyrazu wolnego po zastosowaniu funkcji aktywacji stanowi sygnał wyjściowy danego neuronu. Sygnał ten następnie jest przekazywany do następnej warstwy oraz ich neuronów i traktowany w ten sam sposób.
 
 $$
-n(x) = f(\sum_i{w_i x_i + b})
+n(x) = f(\sum_i{w_i x_i} + b)
 $$
 
 Sygnały z ostatniej warstwy ukrytej dochodzą do warstwy wyjściowej.
 
 #### Propagacja w tył (Backpropagation)
 
-Propagacja w tył jest algorytmem umożliwiającym wytrenowanie sztucznej sieci neuronowej. Trening sieci neuronowej polega na takim dobraniu wag oraz wyrazów wolnych, żeby model mógł przyswoić wzorce, z pomocą których może poprawnie prognozować. Proces treningu składa się z następujących kroków:
+Propagacja w tył jest algorytmem, który określa o ile każda z wag powinna się poprawić, aby osiągnąć optimum. Trening sieci neuronowej polega na takim dobraniu wag oraz wyrazów wolnych, żeby model mógł przyswoić wzorce, z pomocą których może poprawnie prognozować. Proces treningu składa się z następujących kroków:
 
 1. Ustaw wagi wstępne w modelu;
 2. Użyj danych treningowych do przeprowadzenia propagacji w przód;
@@ -241,13 +234,14 @@ Propagacja w tył jest algorytmem umożliwiającym wytrenowanie sztucznej sieci 
 4. Na podstawie wielkości błędu oblicz zmianę wag dla każdego neuronu warstwa po warstwie idąc wstecz;
 5. Powtórz proces od kroku 2., jeżeli to była ostatnia iteracja lub błąd stał się akceptowalny.
 
-A więc propagacja w tył to nic innego jak przerzucanie błędu modelu od warstwy końcowej na sam początek. Błąd można obliczyć korzystając z:
+A więc propagacja w tył to nic innego jak przerzucanie błędu modelu od warstwy końcowej na sam początek, a mówiąc bardziej technicznie - propagujemy gradient straty przy użyciu reguły łańcuchowej. Tenże "błąd" można obliczyć korzystając z:
 
-- różnicy;
-- błędu średniokwadratowego;
-- entropii krzyżowej.
+- średniego błędu względnego (MAE);
+- błędu średniokwadratowego (MSE);
+- binarnej entropii krzyżowej;
+- kategorialnej entropii krzyżowej.
 
-Ponieważ w warstwie wyjściowej znajduje się najczęściej więcej niż jeden neuron, a problemy są częściej z gatunku problemów klasyfikacyjnych, to posługujemy się raczej tą ostatnią metodą na obliczenie błędu. Entropia krzyżowa jest używana do zmiennych jakościowych (kategorialnych). Wyraża się ona wzorem:
+Entropia krzyżowa jest używana do zmiennych jakościowych (kategorialnych). Kategorialna entropia wyraża się ona wzorem:
 
 $$
 L(y,y')=-\sum_{i=1}^cy_ilog (y'_i)
@@ -259,7 +253,7 @@ $y_i$ - Prawdziwa etykieta oznaczająca przynależność do klasy *i*
 
 $y'_i$ - Przewidywane prawdopodobieństwo przynależności do klasy *i*
 
-Aby można było oszacować zmianę wagi, skorzystamy z techniki spadku gradientowego. Gradient jest operacją matematyczną, która określa funkcje pochodne dla każdego argumentu danej funkcji. Pozwala ona wskazać kierunek i odległość, jaką dzieli dany punkt od miejsca optimum. Należy obliczyć gradient dla wyjścia modelu oraz przewidywanego wyjścia i odwrócić kierunek w stronę (lokalnego) optimum poprzez odwrócenie znaku. Dla funkcji sigmoidalnej postaci:
+Aby można było oszacować zmianę wagi, skorzystamy z techniki spadku gradientowego. Gradient jest operacją matematyczną, która określa funkcje pochodne dla każdego argumentu danej funkcji. Pozwala ona wskazać lokalny kierunek najszybszego wzrostu funkcji. Należy obliczyć gradient dla wyjścia modelu oraz przewidywanego wyjścia i odwrócić kierunek w stronę (lokalnego) optimum poprzez odwrócenie znaku. Dla funkcji sigmoidalnej postaci:
 
 $$
 f(x)=\frac{1}{1+e^{-x}}
@@ -282,50 +276,53 @@ pochodną funkcji jest:
 $$
 \frac{d}{dx}f(x)=\begin{cases}
 1, & x>0 \\
-0, & x<0
+0, & x\le0
 \end{cases}
 $$
 
 Oznaczenia:
 
-$N$ - liczba warstw w sieci włącznie z warstwą wejściową i wyjściową \
-$H$ - liczba warstw ukrytych
-
-$M$ - liczba neuronów w warstwie ukrytej (przyjmijmy, że warstwy ukryte mają tyle samo neuronów)\
-$I$ - liczba neuronów w warstwie wejścia \
-$O$ - liczba neuronów w warstwie wyjścia
-
-$w_{j,l}^{i,k}$, $i\lt j$ - waga pomiędzy $k$-tym neuronem $i$-tej warstwy, a $l$-tym neuronem $j$-tej warstwy\
-$b_{i,j}$ - wyraz wolny (bias) w $j$-tym neuronie $i$-tej warstwy\
-$n_{i,j}$ - wartość sygnału neuronu w $j$-tym neuronie w $i$-tej warstwie
-
-$\delta_{j,l}^{i,k}$, $i\lt j$ - zmiana wagi pomiędzy $k$-tym neuronem $i$-tej warstwy, a $l$-tym neuronem $j$-tej warstwy\
-$e_{i,j}$ - błąd w $j$-tym neuronie $i$-tej warstwy\
-$\lambda$ - współczynnik uczenia
-
-Przyjmijmy, że:
-
-$N=M=3$
-
-$I=2$
-
-$O=1$
-
-Dla neuronu wyjściowego (warstwy wyjściowej) wzór na zmianę wag połączeń kończących się w nim jest następujący:
-
-$$
-\delta_{3,1}^{2,k}=e_{3,1} \cdot \frac{d}{dx}f(n_{3,1})
-$$
+- $l$ – numer warstwy sieci,
+- $L$ – numer ostatniej, wyjściowej warstwy,
+- $x$ – wektor danych wejściowych,
+- $a^{(0)} = x$ – wejście sieci,
+- $W^{(l)}$ – macierz wag połączeń prowadzących do warstwy $l$,
+- $b^{(l)}$ – wektor biasów warstwy $l$,
+- $z^{(l)}$ – wartości neuronów przed zastosowaniem funkcji aktywacji:
+  $$
+  z^{(l)} = W^{(l)}a^{(l-1)} + b^{(l)}
+  $$
+- $a^{(l)}$ – sygnały neuronów po zastosowaniu funkcji aktywacji:
+  $$
+  a^{(l)} = f^{(l)}(z^{(l)})
+  $$
+- $f^{(l)}$ – funkcja aktywacji stosowana w warstwie $l$,
+- $f'^{(l)}$ – pochodna funkcji aktywacji,
+- $\mathcal L$ – funkcja straty,
+- $\delta^{(l)}$ – lokalny sygnał błędu/gradientu w warstwie $l$:
+  $$
+  \delta^{(l)}=\frac{\partial\mathcal L}{\partial z^{(l)}}
+  $$
+- $\frac{\partial\mathcal L}{\partial W^{(l)}}$ – gradient funkcji straty względem wag warstwy $l$,
+- $\frac{\partial\mathcal L}{\partial b^{(l)}}$ – gradient funkcji straty względem biasów warstwy $l$,
+- $\eta$ – współczynnik uczenia (learning rate),
+- $\cdot$ – iloczyn skalarny,
 
 $$
-w_{3,1}^{2,k} = w_{3,1}^{2,k} + n_{3,1}^T \cdot \delta_{3,1}^{2,k} \cdot \lambda
+a^{(0)}=x
 $$
-
 $$
-b_{3,1} = b_{3,1} + \sum_{k=1}^M \delta_{3,1}^{2,k}\\
+z^{(l)}=W^{(l)}a^{(l-1)}+b^{(l)}
 $$
-
-$$k=\overline{1,M}$$
+$$
+a^{(l)}=f^{(l)}(z^{(l)})
+$$
+dla warstwy wyjściowej:
+$$
+\delta^{(L)}
+=
+\frac{\partial \mathcal L}{\partial z^{(L)}}
+$$
 
 
 ![image](imgs/backpropagation%201.png)
@@ -333,25 +330,54 @@ $$k=\overline{1,M}$$
 Dla warstwy ukrytej zmiany wag oblicza się w następujący sposób:
 
 $$
-\delta_{2,l}^{1,k} = w_{2,l}^{1,k} \cdot \frac{d}{dx} f(n_{1,l}) \\
+\delta^{(l)}
+=
+\left(W^{(l+1)}\right)^T
+\delta^{(l+1)}
+\cdot
+f'^{(l)}(z^{(l)})
+$$
+gradient wag:
+$$
+\frac{\partial\mathcal L}{\partial W^{(l)}}
+=
+\delta^{(l)}
+\left(a^{(l-1)}\right)^T
+$$
+gradient biasu:
+$$
+\frac{\partial\mathcal L}{\partial b^{(l)}}
+=
+\delta^{(l)}
 $$
 
-$$
-w_{2,l}^{1,k} = w_{2,l}^{1,k} + n_{1,l}^T \cdot \delta_{2,l}^{1,k}
-$$
+i dopiero potem aktualizacja przez prosty gradient descent:
 
 $$
-b_{1,l} = b_{1,l} + \sum_{k=1}^M \delta_{2,l}^{1,k}\\
+W^{(l)}
+\leftarrow
+W^{(l)}
+-
+\eta
+\frac{\partial\mathcal L}{\partial W^{(l)}}
+$$
+$$
+b^{(l)}
+\leftarrow
+b^{(l)}
+-
+\eta
+\frac{\partial\mathcal L}{\partial b^{(l)}}
 $$
 
-$$k,l=\overline{1,M}$$
+
 
 ![image](imgs/backpropagation%202.png)
-Współczynnik uczenia ustawia się po to, aby parametry miały szansę odnaleźć lepsze optimum lokalne. Bez tego model natychmiast wpadnie w najbliższe optimum lokalne, które najczęściej będzie ono niesatysfakcjonujące.
+Współczynnik uczenia określa wielkość kroku wykonywanego przez algorytm korygujący wagi (optimizer). Im mniejszy, tym wolniejszy trening. Im większy, tym większa tendencja do oscylacji i przeskakiwania potencjalnie dobrych obszarów.
 
 #### Interpretacje sieci głębokich
 
-Pierwszą interpretacją, jaką proponuje R. Hurbans w [RHu] jest to, że każda kolejna warstwa ANN tworzy coraz bardziej korelujące dane, które wreszcie stają się w pełni skorelowane na warstwie wyjściowej.
+Pierwszą interpretacją, jaką proponuje R. Hurbans w [RHu] jest to, że kolejne warstwy przekształcają reprezentację danych w taką, w której cechy istotne dla zadania stają się łatwiejsze do wykorzystania przez kolejne warstwy, co ułatwia w ostatniej warstwie wskazanie poprawnej prognozy dzięki widocznym cechom.
 
 
 ![image](imgs/grupowanie%20danych%20w%20klasy.png)
@@ -368,35 +394,34 @@ $D_i$ - liczba neuronów w warstwie wejściowej \
 $D$ - liczba neuronów na warstwę\
 $K$ - liczba warstw pośrednich
 
-W tym ujęciu sieci trzywarstwowe zawierające tylko jedną warstwę ukrytą są ukazane jako nieefektywne, ponieważ mają one mniejszą elastyczność wyrażaną liczbą regionów. Ze wzoru można wywnioskować, że przyrost liczby regionów jest wielomianowy, natomiast ten sam przyrost wywołany zwiększeniem liczby warstw jest wykładniczy.
+Ze wzoru można wywnioskować, że przyrost liczby regionów jest wielomianowy, natomiast ten sam przyrost wywołany zwiększeniem liczby warstw jest wykładniczy. Głębia może umożliwić reprezentowanie pewnych funkcji znacznie bardziej ekonomicznie niż zwiększanie samej szerokości.
 
 ![image](imgs/regiony%20decyzyjne.png)
-Ogólnie rzecz biorąc, ciężko jest stworzyć czytelną i zrozumiałą interpretację modelu dla każdego problemu. Każdy neuron w sieci wykonuje swoje zadanie, które trudno jest opisać jednoznacznie i precyzyjnie. Ale są metody, które pomagają zrozumieć to, jak dana sieć neuronowa dochodzi do rozwiązań. Nimi zajmuje się osobna dziedzina badań - XAI (Explainable AI), dzięki której zyskujemy coraz lepszy wgląd w proces rozumowania systemów opartych na modelach AI, na podstawie którego można oceniać bezpieczeństwo i słuszność w podejściu tych modeli.
+Ogólnie rzecz biorąc, ciężko jest stworzyć czytelną i zrozumiałą interpretację modelu dla każdego problemu. Każdy neuron w sieci wykonuje swoje zadanie, które trudno jest opisać jednoznacznie i precyzyjnie. Ale są metody, które pomagają zrozumieć to, jak dana sieć neuronowa dochodzi do rozwiązań. Nimi zajmuje się osobna dziedzina badań - XAI (Explainable AI), dzięki której zyskujemy coraz lepszy wgląd w czynniki wpływające na predykcje i zachowanie modeli, na podstawie którego można oceniać bezpieczeństwo i słuszność w ich podejściu.
 
-### 1.4 Istota treningu ANN
+### 1.5 Istota treningu ANN
 
-Właściwe ustawienie wag w sieci głębokiej polega na tym, że dla danego zestawu danych treningowych sieć głęboka musi zwracać jak najmniejszy błąd na wyjściu. Algorytm propagacji wstecz działa na zasadzie spadku gradientowego. Niestety (dla architektów sieci głębokich) albo na szczęście (bowiem taka jest rzeczywistość) świat jest bardziej skomplikowany niż funkcja liniowa. W przestrzeni rozwiązań dopuszczalnych są rozwiązania, które zwracają zaledwie minima lokalne funkcji błędu, ale jest też co najmniej jedno rozwiązanie, które zwraca minimum globalne. Gradienty mogą zwracać wartości, które niekoniecznie kierują na minimum globalne, lecz na minimum lokalne, co bez dwóch zdań utrudnia trening. Zatem podczas treningu trzeba zwracać uwagę na to, aby kierunek optymalizacji był z jak największym prawdopodobieństwem zgodny z położeniem minimum globalnego, ewentualnie położeniem rozwiązania w granicach dopuszczalnego błędu względem minimum globalnego.
-
+Właściwe ustawienie wag w sieci głębokiej polega na tym, że dla danego zestawu danych treningowych sieć głęboka zwraca minimalną funkcję celu mając nadzieję, że dla nowych danych również zwróci podobnie niewielką. Algorytm propagacji wstecz działa na zasadzie spadku gradientowego. Niestety (dla architektów sieci głębokich) albo na szczęście (bowiem taka jest rzeczywistość) świat jest bardziej skomplikowany niż funkcja liniowa. W przestrzeni rozwiązań dopuszczalnych są rozwiązania, które zwracają zaledwie minima lokalne funkcji błędu, ale jest też co najmniej jedno rozwiązanie, które zwraca minimum globalne. Gradienty mogą zwracać wartości, które niekoniecznie kierują na minimum globalne, lecz na minimum lokalne, co należy brać pod uwagę. Zatem podczas treningu trzeba zwracać uwagę na to, aby kierunek optymalizacji dążył do wytrenowania takich parametrów, które nie tylko dają dostatecznie małą funkcję celu, ale również dobrą generalizację.
 
 ![image](imgs/minimalizacja.png)
 
-Można to uprawdopodobnić na wiele sposobów. Na przykład podczas inicjalizacji wag losuje się kilka lub więcej zestawów, a następnie dokonuje się selekcji takiego zestawu, który zwraca najmniejszy błąd.
+Można to uprawdopodobnić na wiele sposobów. Na przykład podczas inicjalizacji wag losuje się kilka lub więcej zestawów, a następnie dokonuje się selekcji takiego zestawu, który pozwoli na potencjalnie najbardziej jakościowy trening.
 
-Klasyczny algorytm stochastycznego spadku gradientowego wzbogaca się innymi metodami, które na różnych etapach treningu promują bardziej eksplorację, niż eksploatację przestrzeni rozwiązań i vice versa. Jedne metody robią to poprzez modyfikację współczynnika $\lambda$, który odpowiada za wielkość kroku (wyżarzanie kosinusowe). A inne robią to poprzez szacowanie pędów (momentów) gradientów (rodzina algorytmów Adam).
+Klasyczny algorytm stochastycznego spadku gradientowego wzbogaca się innymi metodami, które na różnych etapach treningu promują bardziej eksplorację, niż eksploatację przestrzeni rozwiązań i vice versa. Jedne metody robią to poprzez modyfikację współczynnika $\lambda$, który odpowiada za wielkość kroku (wyżarzanie kosinusowe). A inne robią to poprzez m.in. szacowanie pędów (momentów) gradientów (rodzina algorytmów Adam).
 
 ![image](imgs/eksploracja%20vs%20eksploatacja.png)
-Kolejną sprawą jest zapobieganie przesadnemu dopasowaniu modelu do danych treningowych. Objawia się to tym, że dla danych treningowych model bardzo trafnie przewiduje wyniki, zaś dla danych spoza tego zbioru model cechuje się gorszą dokładnością, która w skrajnych sytuacjach będzie mniej lub bardziej podobna do zgadywania. W terminologii, która bardzo wiele zawdzięcza światu anglosaskiemu, nazywa się to **overfittingiem**. O sposobach na zapobieganie mu [piszę tutaj](#32-batch-czy-mini-batch-czyli-o-dzieleniu-danych-treningowych).
+Kolejną sprawą jest zapobieganie przesadnemu dopasowaniu modelu do danych treningowych. Objawia się to tym, że dla danych treningowych model bardzo trafnie przewiduje wyniki, zaś dla danych spoza tego zbioru model cechuje się gorszą jakością predykcji, która w skrajnych sytuacjach będzie mniej lub bardziej podobna do zgadywania. W terminologii, która bardzo wiele zawdzięcza światu anglosaskiemu, nazywa się to **overfittingiem**. O sposobach na zapobieganie mu [piszę tutaj](#32-batch-czy-mini-batch-czyli-o-dzieleniu-danych-treningowych).
 
 ![image](imgs/overfitting.png)
 
-### 1.5 Zastosowania
+### 1.6 Zastosowania
 
 Sztuczne sieci neuronowe stosuje się m.in. do:
 
 - szacowania przyszłych cen akcji na giełdzie;
 - oceny ryzyka kredytowego;
 - tłumaczenia tekstów na obce języki;
-- wykrywania chorób ze zdjęć RTG;
+- wspomaganie analizy obrazów medycznych, np. RTG;
 - analizy sentymentu na podstawie wpisów w Internecie;
 - generowania muzyki
 - generowania filmów i obrazów
@@ -411,6 +436,8 @@ Pytania, na które poznasz odpowiedź w tym rozdziale.
 - Na czym polega proces generowania deepfake'ów?
 
 ### 2.1 Sieci konwolucyjne (Convolutional Neural Network)
+
+Sieci konwolucyjne to sieci zbudowane z zupełnie innego rodzaju warstw. Warstwa ta (konwolucyjna) jest oparta na kompletnie innej filozofii. Wykonuje ona operację konwolucji na pikselach dostarczanego obrazu. Na czym ona polega? Konwolucja (nazywana także splotem) to operacja matematyczna, która iteracyjne nakłada na siebie i przesuwa dwa wektory, wymnaża nachodzące na siebie elementy wektorów i dodaje je do siebie tworząc nowy. W przypadku obrazów (reprezentowanych przez macierze) takie przesuwanie się okna jest swojego rodzaju filtrem wydobywającym cechy obrazu potrzebnych do wykrywania pożądanych obiektów oraz ich identyfikacji. Warstwy konwolucyjne są pierwszymi warstwami, które mają kontakt z surowym obrazem. Ich zadaniem jest wydobycie tych cech obrazu, na których identyfikacji nam zależy. Pomiędzy nimi stosuje się również warstwy poolingu, które upraszczają obraz zwracając maksima lokalne na każdy mały obszar lub średnią ważoną. 
 
 ### 2.2 Generatywne Sieci Adwersalne (Generative Adversal Network)
 
@@ -525,7 +552,7 @@ $$
 
 #### Dropout
 
-Polega na losowym zerowaniu wag podczas treningu we wskazanej warstwie lub warstwach. Sterowanie polega na określeniu prawdopodobieństwa, z jakim dowolna waga zostanie wyzerowana po propagacji w tył. Dzięki temu model staje się prostszy, lecz na osiągnięcie pełnej konwergencji model potrzebuje więcej epok.
+Polega na losowym zerowaniu wag podczas treningu we wskazanej warstwie lub warstwach. Sterowanie polega na określeniu prawdopodobieństwa, z jakim dowolna waga zostanie wyzerowana po skorygowaniu wag. Dzięki temu model unika overfittingu poprzez uczenie się wzorców w bardziej rozproszony sposób, a także staje się prostszy, lecz na osiągnięcie pełnej konwergencji model potrzebuje więcej epok.
 
 #### Eliminacja zmiennych nieistotnych
 
@@ -611,6 +638,8 @@ CNN, RNN i Transformery
 
 **Etykieta** - wartość zmiennej kategorialnej
 
+**Ewaluacja** - ocenianie poprawności modelu za pomocą zbioru testowego;
+
 **Ex ante** - łac. "przed faktem". Dotyczy właściwości modelu ocenianych na podstawie danych treningowych;
 
 **Ex post** - łac. "po fakcie". Dotyczy właściwości modelu ocenianych na podstawie danych testowych;
@@ -621,7 +650,7 @@ CNN, RNN i Transformery
 
 **Generalizacja** - zdolność modelu do poprawnego przewidywania wyników dla sytuacji, w których nie był trenowany dzięki redukcji złożoności i upraszczaniu;
 
-**Inferencja** - czas od wprowadzenia danych do modelu do uzyskania prognoz;
+**Inferencja** - obliczanie prognoz przez model;
 
 **Konwergencja** - zbieżność, podobieństwo;
 
@@ -630,6 +659,8 @@ CNN, RNN i Transformery
 **Precyzja** - opisuje miarę rozrzutu wyników. Wysoka precyzja oznacza niewielki rozrzut i vice versa;
 
 **Obserwacja** - pojedynczy zestaw wartości zmiennych objaśniających;
+
+**Optimizer** - Algorytm służący do korygowania wag w modelu. Wykorzystuje gradient obliczony za pomocą backpropagation i zależnie od wersji dobiera wielkość korekty do wagi;
 
 **Predykcja** - zbiór prawdopodobieństw przynależności do kategorii zmiennej zależnej uzyskany z modelu lub oszacowanie wartości tejże zmiennej, jeżeli jest numeryczna;
 
