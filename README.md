@@ -1,10 +1,20 @@
 # Sztuczne Sieci Neuronowe
 
-Release v0.2.0
+## Release v0.2.0
+
+### Nowości
+
+- Skrypty treningu sieci neuronowych zarówno do regresji, jak i klasyfikacji
+- Ilustracje do rozdziału 1.
+- Sposoby na ograniczenie overfittingu
+- Słownik pojęć technicznych
+- Optimizery [?]
 
 ## Spis treści
 
 - [Sztuczne Sieci Neuronowe](#sztuczne-sieci-neuronowe)
+  - [Release v0.2.0](#release-v020)
+    - [Nowości](#nowości)
   - [Spis treści](#spis-treści)
   - [1 Wprowadzenie](#1-wprowadzenie)
     - [1.1 Geneza](#11-geneza)
@@ -349,9 +359,7 @@ Pierwszą interpretacją, jaką proponuje R. Hurbans w [RHu] jest to, że każda
 Drugą interpretacją zaproponowaną w [Wel] jest to, że sieć neuronową odwzorowuje mapa regionów decyzyjnych oddzielonych granicami decyzyjnymi. Im więcej neuronów, tym więcej granic i obszarów, lecz im więcej warstw w sieci, tym więcej takich obszarów i tym mniejszy koszt obliczeniowy. Dobrze oddaje to wzór na maksymalną liczbę regionów:
 
 $$
-
 N = (\frac{D}{D_i} + 1)^{D_i (K-1)}(\frac{D^2+D+2}{2})
-
 $$
 
 Gdzie:
