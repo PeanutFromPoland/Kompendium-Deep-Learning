@@ -306,7 +306,6 @@ Oznaczenia:
 - $\frac{\partial\mathcal L}{\partial W^{(l)}}$ – gradient funkcji straty względem wag warstwy $l$,
 - $\frac{\partial\mathcal L}{\partial b^{(l)}}$ – gradient funkcji straty względem biasów warstwy $l$,
 - $\eta$ – współczynnik uczenia (learning rate),
-- $\cdot$ – iloczyn skalarny,
 
 $$
 a^{(0)}=x
@@ -437,17 +436,71 @@ Pytania, na które poznasz odpowiedź w tym rozdziale.
 
 ### 2.1 Sieci konwolucyjne (Convolutional Neural Network)
 
-Sieci konwolucyjne to sieci zbudowane z zupełnie innego rodzaju warstw. Warstwa ta (konwolucyjna) jest oparta na kompletnie innej filozofii. Wykonuje ona operację konwolucji na pikselach dostarczanego obrazu. Na czym ona polega? Konwolucja (nazywana także splotem) to operacja matematyczna, która iteracyjne nakłada na siebie i przesuwa dwa wektory, wymnaża nachodzące na siebie elementy wektorów i dodaje je do siebie tworząc nowy. W przypadku obrazów (reprezentowanych przez macierze) takie przesuwanie się okna jest swojego rodzaju filtrem wydobywającym cechy obrazu potrzebnych do wykrywania pożądanych obiektów oraz ich identyfikacji. Warstwy konwolucyjne są pierwszymi warstwami, które mają kontakt z surowym obrazem. Ich zadaniem jest wydobycie tych cech obrazu, na których identyfikacji nam zależy. Pomiędzy nimi stosuje się również warstwy poolingu, które upraszczają obraz zwracając maksima lokalne na każdy mały obszar lub średnią ważoną. 
+![image](imgs/cnn.png)
+
+Sieci konwolucyjne (CNN) to rodzaj sieci neuronowych zaprojektowany do pracy z danymi posiadającymi **lokalną strukturę**, takimi jak obrazy, sygnały czy szeregi czasowe. Szczególnie dobrze sprawdzają się tam, gdzie istotna jest relacja pomiędzy sąsiadującymi elementami danych — na przykład pomiędzy pobliskimi pikselami obrazu.
+
+Podstawowym mechanizmem wykorzystywanym przez CNN jest **konwolucja**, nazywana również splotem. Polega ona na przesuwaniu niewielkiego **filtra (jądra, kernela)** po danych wejściowych. W każdej pozycji wartości filtra są mnożone przez odpowiadające im wartości fragmentu wejścia, a otrzymane iloczyny są następnie sumowane. Wynik tej operacji tworzy nową reprezentację danych nazywaną **mapą cech** (*feature map*). Ściśle rzecz biorąc, operacja stosowana w większości implementacji CNN jest matematycznie korelacją krzyżową, jednak w kontekście sieci neuronowych zwyczajowo określa się ją mianem konwolucji.
+
+Filtr można traktować jako niewielki **detektor określonego wzorca**. Ten sam zestaw wag jest stosowany w różnych miejscach wejścia, dlatego filtr może reagować na podobną cechę pojawiającą się w różnych częściach obrazu. Pierwsze warstwy sieci uczą się zazwyczaj prostych cech, takich jak krawędzie, kierunki czy zmiany kontrastu. Kolejne warstwy mogą łączyć je w coraz bardziej złożone reprezentacje — tekstury, fragmenty kształtów, części obiektów, a ostatecznie struktury przydatne do rozwiązania konkretnego zadania.
+
+Pomiędzy warstwami konwolucyjnymi mogą występować również warstwy **poolingu**, których zadaniem jest zmniejszenie przestrzennych rozmiarów reprezentacji. Przykładowo **max pooling** wybiera największą wartość z niewielkiego obszaru, natomiast **average pooling** oblicza jego średnią. Pooling nie służy więc bezpośrednio do wybierania „najważniejszych cech”, lecz przede wszystkim do **kompresowania reprezentacji**, zwiększania pola recepcyjnego kolejnych warstw oraz ograniczania wrażliwości modelu na niewielkie przesunięcia cech w danych.
+
+W przeciwieństwie do klasycznej warstwy w pełni połączonej, neuron warstwy konwolucyjnej **nie analizuje od razu całego obrazu**. Otrzymuje jedynie informacje z niewielkiego lokalnego obszaru. Ponadto te same wagi filtra są współdzielone w wielu miejscach wejścia. Dzięki temu sieci konwolucyjne wykorzystują znacznie mniej parametrów niż analogiczne sieci w pełni połączone i zachowują informację o przestrzennej strukturze danych.
+
+Trening CNN polega między innymi na **uczeniu wartości wag filtrów**. Nie projektujemy więc ręcznie filtrów odpowiedzialnych np. za wykrywanie krawędzi, oczu czy określonych dźwięków. Podczas uczenia, za pomocą propagacji wstecznej i algorytmu optymalizacyjnego, sieć sama dostosowuje wartości filtrów tak, aby uzyskiwane przez nią reprezentacje były przydatne do minimalizacji funkcji straty. W ten sposób może nauczyć się cech potrzebnych między innymi do klasyfikacji obrazów, rozpoznawania mowy czy analizy sygnałów.
+
+Jedną z najważniejszych historycznie sieci konwolucyjnych był **AlexNet**, zaprezentowany przez Alexa Krizhevsky'ego, Ilyę Sutskevera i Geoffreya Hintona w 2012 roku. Model osiągnął przełomowy wynik w konkursie **ImageNet Large Scale Visual Recognition Challenge (ILSVRC)** w zadaniu klasyfikacji obrazów, znacząco przewyższając wcześniejsze rozwiązania i przyczyniając się do gwałtownego wzrostu zainteresowania głębokimi sieciami neuronowymi. AlexNet zawierał **5 warstw konwolucyjnych i 3 warstwy w pełni połączone**. Warstwy konwolucyjne odpowiadały za tworzenie hierarchicznych reprezentacji obrazu, natomiast końcowe warstwy wykorzystywały te reprezentacje do klasyfikacji obrazu do jednej z 1000 klas.
 
 ### 2.2 Generatywne Sieci Adwersalne (Generative Adversal Network)
 
+![image](imgs/gan.png)
+
+Generatywne sieci adwersalne (GAN) to architektury składające się z dwóch sieci neuronowych uczonych jednocześnie: **generatora** i **dyskryminatora**. Generator otrzymuje na wejściu zwykle losowy wektor i próbuje na jego podstawie tworzyć nowe próbki przypominające dane treningowe, np. obrazy twarzy. Dyskryminator natomiast otrzymuje zarówno dane prawdziwe, jak i wygenerowane, a jego zadaniem jest rozpoznanie, które z nich pochodzą ze zbioru treningowego. GAN nie jest więc pojedynczą siecią „rysującą obrazy”, lecz układem dwóch konkurujących ze sobą modeli, z których jeden uczy się **generować**, a drugi **oceniać autentyczność** wygenerowanych danych.
+
+Uczenie GAN można rozumieć jako **grę adwersaryjną**. Dyskryminator jest optymalizowany tak, aby coraz skuteczniej odróżniał dane prawdziwe od sztucznych, natomiast generator — aby coraz skuteczniej wprowadzał dyskryminator w błąd. W miarę treningu generator dostaje pośrednią informację zwrotną o tym, jakie cechy danych powodują, że jego próbki wyglądają wiarygodnie, i stopniowo uczy się przybliżać rozkład danych treningowych. W idealnym przypadku dochodzi do stanu, w którym próbki generatora są na tyle podobne statystycznie do rzeczywistych, że dyskryminator nie potrafi ich niezawodnie rozróżnić.
+
+GAN-y mogą generować bardzo realistyczne obrazy, modyfikować styl danych, zwiększać rozdzielczość obrazów czy tworzyć syntetyczne przykłady do augmentacji zbiorów treningowych. Ich uczenie jest jednak trudniejsze niż klasyczne trenowanie pojedynczej sieci, ponieważ poprawa jednego modelu stale zmienia problem rozwiązywany przez drugi. Typowymi problemami są **niestabilność treningu** oraz **mode collapse**, w którym generator produkuje tylko niewielką liczbę podobnych typów przykładów zamiast odwzorowywać pełną różnorodność danych. Z tego powodu opracowano wiele odmian GAN-ów, takich jak **DCGAN, WGAN, CycleGAN czy StyleGAN**, które modyfikują architekturę lub funkcję celu, aby poprawić stabilność i jakość generowanych danych.
+
 ### 2.3 Sieci Rekurencyjne (Recurrent Neural Network)
+
+![image](imgs/rnn.png)
+
+Sieci rekurencyjne (Recurrent Neural Networks, RNN) to rodzaj sieci neuronowych przeznaczonych przede wszystkim do przetwarzania danych sekwencyjnych, czyli takich, w których kolejność elementów ma znaczenie. Mogą to być na przykład szeregi czasowe, tekst, sygnały dźwiękowe czy sekwencje pomiarów. W przeciwieństwie do klasycznej sieci feedforward, która traktuje każde wejście niezależnie, RNN utrzymuje stan ukryty (hidden state) zawierający informację o wcześniej przetworzonych elementach sekwencji. Dla kolejnego elementu wejściowego sieć korzysta więc zarówno z aktualnych danych, jak i ze swojego wcześniejszego stanu.
+
+Mechanizm ten można wyobrazić sobie jako wielokrotne używanie tej samej warstwy dla kolejnych elementów sekwencji. W chwili $t$ sieć oblicza nowy stan $h_t$ na podstawie aktualnego wejścia $x_t$ oraz poprzedniego stanu $h_{t-1}$. Te same parametry są współdzielone pomiędzy kolejnymi krokami czasowymi, dzięki czemu długość sekwencji nie musi być z góry ustalona. Podczas uczenia sieć można „rozwinąć w czasie”, a gradienty propagować przez kolejne kroki za pomocą backpropagation through time (BPTT).
+
+Problemem klasycznych RNN jest trudność w uczeniu się zależności obejmujących wiele kroków sekwencji. Podczas propagacji gradientów wielokrotne mnożenie przez te same macierze może prowadzić do zanikania gradientu lub jego eksplozji. W efekcie zwykła RNN często dobrze wychwytuje zależności lokalne, ale może mieć problem z zapamiętaniem informacji sprzed kilkudziesięciu czy kilkuset kroków. RNN nie należy więc rozumieć jako sieci posiadającej trwałą pamięć całej historii — jej stan jest raczej skompresowanym, stale aktualizowanym opisem dotychczasowej sekwencji.
 
 ### 2.4 Długa Pamięć Krótkoterminowa LSTM (Long Short-Term Memory)
 
+![image](imgs/lstm.png)
+
+LSTM (Long Short-Term Memory) jest szczególnym rodzajem sieci rekurencyjnej zaprojektowanym tak, aby skuteczniej przechowywać informacje przez długie fragmenty sekwencji. Nie jest to zatem konkurencyjna wobec RNN rodzina sieci, lecz jej bardziej rozbudowany wariant. Najważniejszą zmianą jest wprowadzenie dodatkowego stanu komórki $c_t$, który tworzy stosunkowo bezpośrednią ścieżkę przepływu informacji przez kolejne kroki czasowe. Dzięki temu istotne informacje mogą być zachowywane znacznie dłużej niż w klasycznej RNN.
+
+Przepływem informacji zarządzają specjalne mechanizmy nazywane bramkami. Bramka zapominania (forget gate) określa, jaka część dotychczasowej informacji powinna zostać usunięta, bramka wejściowa (input gate) decyduje, jakie nowe informacje mają zostać zapisane, natomiast bramka wyjściowa (output gate) kontroluje, jaka część stanu komórki wpłynie na aktualny stan ukryty i wyjście sieci. Wartości bramek są wyznaczane przez samą sieć podczas uczenia, dzięki czemu model może nauczyć się, kiedy informacje należy zapamiętywać, a kiedy ignorować.
+
+Tak skonstruowany mechanizm znacznie ogranicza problem zanikania gradientu i pozwala modelować długoterminowe zależności w danych, dlatego LSTM przez wiele lat były podstawowym narzędziem m.in. w przetwarzaniu języka, rozpoznawaniu mowy i analizie szeregów czasowych. Nie oznacza to jednak, że LSTM posiada nieograniczoną lub symboliczną pamięć — nadal przechowuje informacje w wektorach o ustalonym rozmiarze i może tracić szczegóły bardzo długich sekwencji. Jest również bardziej złożona obliczeniowo od klasycznej RNN ze względu na większą liczbę parametrów i operacji wykonywanych w każdym kroku czasowym.
+
 ### 2.5 GAT
 
+![image](imgs/gat.png)
+
+Graph Attention Networks (GAT) należą do grafowych sieci neuronowych (Graph Neural Networks, GNN) i służą do przetwarzania danych reprezentowanych w postaci grafu. Graf składa się z węzłów oraz łączących je krawędzi — może więc reprezentować na przykład sieć społecznościową, cząsteczkę chemiczną, sieć transportową czy zbiór powiązanych dokumentów. W przeciwieństwie do sieci operujących na regularnych strukturach, takich jak obrazy lub sekwencje, GAT nie zakłada stałej liczby ani uporządkowania sąsiadów każdego elementu.
+
+Podstawą działania GAT jest mechanizm attention, za pomocą którego węzeł ocenia znaczenie informacji pochodzącej od swoich sąsiadów. Dla każdego połączenia wyznaczany jest współczynnik uwagi określający, jak silnie cechy danego sąsiada powinny wpłynąć na nową reprezentację rozpatrywanego węzła. Następnie reprezentacje sąsiadów są ważone tymi współczynnikami i agregowane. Często stosuje się jednocześnie kilka niezależnych mechanizmów uwagi, czyli multi-head attention, pozwalających analizować relacje między węzłami na różne sposoby.
+
+GAT nie należy jednak utożsamiać z Transformerem tylko dlatego, że obie architektury wykorzystują attention. W typowej warstwie GAT uwaga jest ograniczona przede wszystkim do węzłów połączonych krawędziami grafu, dzięki czemu sam graf określa, pomiędzy którymi elementami może następować wymiana informacji. Kolejne warstwy pozwalają stopniowo zwiększać zasięg tej komunikacji — po jednej warstwie węzeł otrzymuje informacje od bezpośrednich sąsiadów, po dwóch również pośrednio od sąsiadów drugiego rzędu itd. Dzięki temu GAT może uczyć się jednocześnie cech poszczególnych obiektów oraz znaczenia relacji zachodzących między nimi.
+
 ### 2.6 Autoenkodery
+
+![image](imgs/autoenkoder.png)
+
+Autoenkodery (ang. autoencoders) to sieci neuronowe uczące się kompresować dane do zwartej reprezentacji, a następnie odtwarzać z niej dane wejściowe. Typowy autoenkoder składa się z dwóch części: enkodera, który przekształca wejście $x$ w reprezentację ukrytą $z$, oraz dekodera, który na podstawie $z$ rekonstruuje przybliżenie wejścia $\hat{x}$. Uczenie polega na minimalizacji błędu rekonstrukcji, czyli różnicy pomiędzy $x$ i $\hat{x}$. W przeciwieństwie do klasyfikatora autoenkoder nie musi przewidywać zewnętrznej etykiety — jego celem jest nauczenie się takiej reprezentacji danych, która zachowuje informacje potrzebne do ich odtworzenia.
+
+Najważniejszym elementem jest zwykle wąskie gardło (bottleneck), czyli reprezentacja ukryta o mniejszej liczbie wymiarów lub w inny sposób ograniczonej pojemności. Ograniczenie to zmusza sieć do wydobywania istotnych struktur i zależności zamiast prostego kopiowania wejścia. Przykładowo, autoenkoder uczony na obrazach twarzy może w reprezentacji ukrytej kodować cechy związane z kształtem twarzy, oświetleniem czy położeniem elementów obrazu, pomijając część mniej istotnych szczegółów. Autoenkoder nie jest jednak po prostu algorytmem kompresji plików — jego reprezentacja jest uczona na podstawie statystycznej struktury konkretnego zbioru danych i ma przede wszystkim umożliwiać dobrą rekonstrukcję przykładów podobnych do tych obserwowanych podczas treningu.
+
+Po nauczeniu autoenkodera jego reprezentacja ukryta może być wykorzystana do redukcji wymiarowości, ekstrakcji cech, usuwania szumu czy wykrywania anomalii. W tym ostatnim przypadku model uczony na danych typowych zazwyczaj dobrze je rekonstruuje, natomiast nietypowe obserwacje mogą powodować większy błąd rekonstrukcji. Istnieją również bardziej wyspecjalizowane odmiany, takie jak denoising autoencoders, uczone do odtwarzania czystych danych z zaszumionego wejścia, oraz wariacyjne autoenkodery (VAE), które uczą uporządkowanej probabilistycznej przestrzeni ukrytej i mogą służyć do generowania nowych przykładów.
 
 ### 2.7 Transformery
 
@@ -458,6 +511,8 @@ Sieci konwolucyjne to sieci zbudowane z zupełnie innego rodzaju warstw. Warstwa
 #### 2.7.3 Enkoder
 
 #### 2.7.4 Dekoder
+
+### 2.8 Modele dyfuzyjne
 
 ## 3 Dodatki
 
