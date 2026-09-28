@@ -1,10 +1,20 @@
 # Sztuczne Sieci Neuronowe
 
-Release v0.2.0
+## Release v0.2.0
+
+### Nowości
+
+- Skrypty treningu sieci neuronowych zarówno do regresji, jak i klasyfikacji
+- Ilustracje do rozdziału 1.
+- Sposoby na ograniczenie overfittingu
+- Słownik pojęć technicznych
+- Optimizery [?]
 
 ## Spis treści
 
 - [Sztuczne Sieci Neuronowe](#sztuczne-sieci-neuronowe)
+  - [Release v0.2.0](#release-v020)
+    - [Nowości](#nowości)
   - [Spis treści](#spis-treści)
   - [1 Wprowadzenie](#1-wprowadzenie)
     - [1.1 Geneza](#11-geneza)
@@ -41,7 +51,11 @@ Release v0.2.0
       - [AdaDelta](#adadelta)
       - [Adam (Adaptive Moment Estimation)](#adam-adaptive-moment-estimation)
       - [AdamW](#adamw)
-    - [3.2 Sposoby na ograniczenie overfittingu](#32-sposoby-na-ograniczenie-overfittingu)
+    - [3.2 Batch czy mini batch? Czyli o dzieleniu danych treningowych](#32-batch-czy-mini-batch-czyli-o-dzieleniu-danych-treningowych)
+      - [Metoda spadku gradientu (batch gradient descent)](#metoda-spadku-gradientu-batch-gradient-descent)
+      - [Metoda stochastycznego spadku gradientu (SGD)](#metoda-stochastycznego-spadku-gradientu-sgd)
+      - [Mini-batch gradient descent](#mini-batch-gradient-descent)
+    - [3.3 Sposoby na ograniczenie overfittingu](#33-sposoby-na-ograniczenie-overfittingu)
       - [Hold-out](#hold-out)
       - [Walidacja krzyżowa](#walidacja-krzyżowa)
       - [Regularyzacja](#regularyzacja)
@@ -49,16 +63,19 @@ Release v0.2.0
       - [Eliminacja zmiennych nieistotnych](#eliminacja-zmiennych-nieistotnych)
       - [Wzbogacanie danych treningowych (data augmentation)](#wzbogacanie-danych-treningowych-data-augmentation)
       - [Ograniczanie złożoności modelu](#ograniczanie-złożoności-modelu)
-    - [3.3 XAI](#33-xai)
-    - [3.4 Metody treningu z niewielką lub żadną ilością danych](#34-metody-treningu-z-niewielką-lub-żadną-ilością-danych)
-    - [3.5 Architektury modeli STT i TTS](#35-architektury-modeli-stt-i-tts)
+      - [Wczesne kończenie treningu](#wczesne-kończenie-treningu)
+    - [3.4 XAI](#34-xai)
+    - [3.5 Metody treningu z niewielką lub żadną ilością danych](#35-metody-treningu-z-niewielką-lub-żadną-ilością-danych)
+    - [3.6 Architektury modeli STT i TTS](#36-architektury-modeli-stt-i-tts)
+    - [3.7 Antykruchość, czyli lekcja dla każdego analityka](#37-antykruchość-czyli-lekcja-dla-każdego-analityka)
   - [4 Bibliografia](#4-bibliografia)
+  - [5 Słownik pojęć technicznych i anglojęzycznych](#5-słownik-pojęć-technicznych-i-anglojęzycznych)
   
 ---
 
 ## 1 Wprowadzenie
 
-Rozdział ten opowiada o istocie i zasadzie działania sztucznych sieci neuronowych. Opisuje ich genezę, budowę, zastosowania we współczesnym świecie i mechanizmy, które zachodzą zarówno podczas trenowania, jak i ewaluacji modeli opartych o sztuczne sieci neuronowe.
+Rozdział ten opowiada o istocie i zasadzie działania sztucznych sieci neuronowych (artificial neural network - ANN). Opisuje ich genezę, budowę, zastosowania we współczesnym świecie i mechanizmy, które zachodzą zarówno podczas trenowania, jak i ewaluacji modeli opartych o sztuczne sieci neuronowe.
 
 Pytania, na które poznasz odpowiedź w tym rozdziale.
 
@@ -69,38 +86,49 @@ Pytania, na które poznasz odpowiedź w tym rozdziale.
 
 ### 1.1 Geneza
 
-Bezpośrednią inspiracją dla powstania sztucznych sieci neuronowych (które będę skrótowo odtąd nazywać ANN - Artificial Neural Network) jest budowa neuronów w ludzkim mózgu.
+Bezpośrednią inspiracją dla powstania sztucznych sieci neuronowych (które będę skrótowo odtąd nazywać sieciami neuronowymi lub głębokimi sieciami neuronowymi) jest budowa neuronów w ludzkim mózgu.
 
 ![image](imgs/neuron.png)
 
-Neurony w mózgu składają się z dendrytów, jądra komórkowego, ciała komórkowego, aksonu i synaps. Dendrydy otrzymują sygnały z sąsiednich neuronów i przekazują je do ciała i jądra komórkowego, które modyfikują sygnał. Akson przekazuje nowy sygnał do synaps podłączonych do dendrydów innych neuronów.
+Neurony w mózgu składają się z dendrytów, jądra komórkowego, ciała komórkowego, aksonu i synaps. Dendrydy otrzymują sygnały z sąsiednich neuronów i przekazują je do ciała i jądra komórkowego modyfikującego sygnał. Akson przekazuje nowy sygnał do synaps podłączonych do dendrydów innych neuronów. A dalej odbywa się ten sam proces.
 
-Sygnały w mózgu przechodzą między neuronami, w których poddawane są indywidualnym procesom transformacji. Siła sygnału wyjściowego neuronu zależy od siły sygnałów wejściowych.
+Sygnały w mózgu przechodzą między neuronami, a w każdym z nich poddawane są indywidualnym procesom transformacji.
 
 ### 1.2 Perceptron
 
-Twórcy koncepcji ANN zaproponowali, aby siła sygnałów była reprezentowana przez liczby rzeczywiste, a procesy transformacji polegały na obliczaniu wartości funkcji liniowej zawierającej tyle samo zmiennych, co wejść do danego sztucznego neuronu i zastosowaniu na nich wag, które pozwolą zbalansować wpływ różnych sygnałów na wielkość sygnału wyjściowego. Jest to bardzo ważne, gdyż bez tego pewne części ANN mogłyby w sposób niezamierzony (i na dodatek nieuczciwy) wpływać na wynik końcowy.
-
-Przyjmijmy, że sieć neuronowa została wytrenowana do szacowania wartości mieszkania w zależności od metrażu, odległości od centrum i przeciętnych zarobków w tym mieście. Łatwo da się dostrzec, że dziedzina zmiennej opisującej przeciętne pensje mieści się w przedziale kilku, kilkunastu tysięcy. Gdyby nie stosować wag, to ta właśnie zmienna "przejęłaby kontrolę" nad modelem, co jest absolutnie niepożądane. Chcemy, aby każda zmienna w modelu miała wstępnie te same szanse.
+Twórcy koncepcji ANN zaproponowali, aby odwzorować matematycznie procesy zachodzące w mózgu. W modelu matematycznym procesy transformacji mają polegać na obliczaniu wartości funkcji liniowej poddanej *pewnej operacji* wprowadzającej nieliniowość. Funkcja ta ma mieć tyle samo zmiennych, co wejść do danego neuronu plus wyraz wolny zwany w terminologii uczenia maszynowego *bias*'em.
 
 Tak zbudowany neuron nazywamy perceptronem.
 
-Jest jeszcze jedna rzecz, która odróżnia perceptron od zwyczajnych funkcji liniowych. Bez tej rzeczy sieci głębokie dałoby się uprościć do funkcji liniowych i nie miałyby żadnego zastosowania. Ten element odpowiada za nieliniowość w sieciach głębokich. Jest nim funkcja aktywacji.
+Ta *pewna operacja* odróżnia perceptron od zwyczajnych funkcji liniowych. Bez niej sieci głębokie dałoby się uprościć do funkcji liniowych i nie miałyby żadnego zastosowania. I jest nią funkcja aktywacji.
 
 ### 1.2 Funkcje aktywacji
 
-Funkcja aktywacji jest funkcją, która dla sumy wartości sygnałów i szumu dodawanego przez dany neuron zwraca nieliniowy sygnał na wyjście. Umożliwia ona odwzorowywanie nieliniowych zależności pomiędzy zmiennymi zależnymi (reprezentowanymi przez neurony warstwy końcowej), a zmiennymi wejściowymi (reprezentowanymi przez neurony w warstwie wejściowej). Dzięki temu ANN-y mogą uczyć się przewidywania nieliniowych zależności.
+![image](imgs/perceptron.png)
+Funkcja aktywacji jest funkcją, która dla wartości funkcji liniowej zwraca nieliniowy sygnał na wyjście. Umożliwia ona odwzorowywanie nieliniowych zależności pomiędzy zmiennymi zależnymi (reprezentowanymi przez neurony warstwy końcowej), a zmiennymi wejściowymi (reprezentowanymi przez neurony w warstwie wejściowej). Dzięki temu ANN-y mogą uczyć się przewidywania nieliniowych zależności.
 
 #### W przeszłości
 
 W przeszłości używano funkcji trygonometrycznych takich jak funkcja sigmoidalna i tangens hiperboliczny (tanh). Niestety, badacze zauważyli, że powodują one kilka problemów.
 
-1. Wykazują tendencję do nasycania się, co objawia się tym, że nieważne czy wejście ma dużą wartość, czy większą to zwraca ona bardzo małą pochodną, co straszliwie spowalnia trening;
+1. Wykazują tendencję do nasycania się, co objawia się tym, że nieważne czy wejście ma dużą wartość, czy większą to zwraca ona bardzo małą pochodną, co straszliwie spowalnia trening, co można zauważyć na dołączonych ilustracjach;
 2. Niewielkie wartości pochodnych dążące do 0 są piętą achillesową dla komputerów. Błędy numeryczne kumulują się wraz z obliczaniem kolejnych warstw, co utrudnia sprawne korygowanie wag.
+
+![image](imgs/tanh.png)
+Legenda:
+
+- czerwony kolor: funkcja tangensa hiperbolicznego;
+- żółty kolor: pochodna funkcji tangensa hiperbolicznego;
+
+![image](imgs/sigmoid.png)
+Legenda:
+
+- fioletowy kolor: funkcja sigmoidalna;
+- żółty kolor: pochodna funkcji sigmoidalnej;
 
 #### ReLU
 
-Aby rozwiązać oba te problemy zaproponowano funkcję ReLU (Rectified Linear Unit). Dla wartości niezerowych jest liniowa, ale dla ujemnych wartości zwraca zero. Dzięki temu nie nasyca się, a ponadto wykazuje się prostą pochodną, która eliminuje problem błędów numerycznych. Oczywiście są różne wariacje na temat funkcji ReLU, są jeszcze funkcje oparte o stałą $e$, ale na początek warto znać kilka podstawowych funkcji aktywacji.
+Aby rozwiązać oba te problemy zaproponowano funkcję ReLU (Rectified Linear Unit). Dla wartości niezerowych jest liniowa, ale dla ujemnych wartości zwraca zero. Dzięki temu nie nasyca się, a ponadto wykazuje się prostą pochodną, która eliminuje problem błędów numerycznych. Oczywiście są różne wariacje na temat funkcji ReLU, ale na początek warto znać kilka podstawowych funkcji aktywacji.
 
 #### Lista funkcji aktywacji
 
@@ -168,6 +196,9 @@ $$
 
 *- funkcje te są jedynymi dozwolonymi na warstwach wyjściowych
 
+
+![image](imgs/relu.png)
+
 ### 1.3 Wielowarstwowy perceptron - sieć głęboka
 
 Sieci zbudowane są z wielu takich perceptronów ułożonych równolegle ze sobą tworząc warstwy sieci. Warstwy sieci z kolei są połączone szeregowo, co czyni je siecią głęboką. Najprostszą postacią sieci głębokiej jest perceptron wielowarstwowy, w skrócie MLP (Multi Layer Perceptron). W dalszej części kompendium pojawi się sieć sprzężenia do przodu (Feedforward Neural Network), która jest w zasadzie tym samym, z tym że nazwa nawiązuje do tego, jak model dokonuje obliczeń.
@@ -188,7 +219,11 @@ Liczba neuronów w warstwie wyjściowej odpowiada liczbie klas szacowanej zmienn
 
 #### Propagacja w przód
 
-Warstwa wejścia dostarcza danych liczbowych do neuronów pierwszej warstwy ukrytej. Każdy taki neuron z osobna w warstwie ma własny zestaw wag oraz parametr szumu, zwany *biasem*, którymi traktuje dane wejściowe. Suma iloczynu skalarnego wektora wag i wektora danych wejściowych oraz szumu po zastosowaniu funkcji aktywacji stanowi sygnał wyjściowy danego neuronu. Sygnał ten następnie jest przekazywany do następnej warstwy i ich neuronów i traktowany tak samo.
+Propagacja w przód jest mechanizmem, który pozwala uzyskiwać prognozy po wprowadzeniu do modelu danych wejściowych. Jeśliby spojrzeć na model *z lotu ptaka*, to liczby wprowadzone na wejście są przekazywane DO PRZODU warstwa po warstwie. Sygnał nie jest propagowany ani w kierunku tych samych neuronów w warstwie, ani do tyłu. W innych architekturach np. sieciach rekurencyjnych lub rezydualnych sygnał może być przekazywany od neuronu do neuronu w obrębie warstwy lub może je pomijać.
+
+![image](imgs/forward%20passing.png)
+
+Warstwa wejścia dostarcza danych liczbowych do neuronów pierwszej warstwy ukrytej. Każdy taki neuron z osobna w warstwie ma własny zestaw wag oraz wyraz wolny, zwany *biasem*, którymi traktuje dane wejściowe. Suma iloczynu skalarnego wektora wag i wektora danych wejściowych oraz wyrazu wolnego po zastosowaniu funkcji aktywacji stanowi sygnał wyjściowy danego neuronu. Sygnał ten następnie jest przekazywany do następnej warstwy oraz ich neuronów i traktowany w ten sam sposób.
 
 $$
 n(x) = f(\sum_i{w_i x_i + b})
@@ -196,11 +231,9 @@ $$
 
 Sygnały z ostatniej warstwy ukrytej dochodzą do warstwy wyjściowej.
 
-Propagacja w przód polega na przekazywaniu sygnałów DO PRZODU warstwa po warstwie. Sygnał nie jest propagowany ani w kierunku tych samych neuronów w warstwie, ani do tyłu. W innych architekturach np. sieciach rekurencyjnych lub rezydualnych sygnał może być przekazywany od neuronu do neuronu w obrębie warstwy lub może je pomijać.
-
 #### Propagacja w tył (Backpropagation)
 
-Propagacja w tył jest algorytmem umożliwiającym wytrenowanie sztucznej sieci neuronowej. Proces treningu składa się z następujących kroków:
+Propagacja w tył jest algorytmem umożliwiającym wytrenowanie sztucznej sieci neuronowej. Trening sieci neuronowej polega na takim dobraniu wag oraz wyrazów wolnych, żeby model mógł przyswoić wzorce, z pomocą których może poprawnie prognozować. Proces treningu składa się z następujących kroków:
 
 1. Ustaw wagi wstępne w modelu;
 2. Użyj danych treningowych do przeprowadzenia propagacji w przód;
@@ -212,10 +245,9 @@ A więc propagacja w tył to nic innego jak przerzucanie błędu modelu od warst
 
 - różnicy;
 - błędu średniokwadratowego;
-- kwadratu odległości euklidesowej;
 - entropii krzyżowej.
 
-Ponieważ w warstwie wyjściowej znajduje się najczęściej więcej niż jeden neuron, a problemy są częściej z gatunku problemów klasyfikacyjnych, to posługujemy się raczej tą ostatnią metodą na obliczenie błędu. Odległość euklidesowa to po prostu błąd średniokwadratowy, lecz dla wektora parametrów wyjściowych. Używany jest do szacowania zmiennych ilościowych. Zaś entropia krzyżowa jest używana do zmiennych jakościowych (kategorialnych). Wyraża się ona wzorem:
+Ponieważ w warstwie wyjściowej znajduje się najczęściej więcej niż jeden neuron, a problemy są częściej z gatunku problemów klasyfikacyjnych, to posługujemy się raczej tą ostatnią metodą na obliczenie błędu. Entropia krzyżowa jest używana do zmiennych jakościowych (kategorialnych). Wyraża się ona wzorem:
 
 $$
 L(y,y')=-\sum_{i=1}^cy_ilog (y'_i)
@@ -227,7 +259,7 @@ $y_i$ - Prawdziwa etykieta oznaczająca przynależność do klasy *i*
 
 $y'_i$ - Przewidywane prawdopodobieństwo przynależności do klasy *i*
 
-Aby można było oszacować zmianę wagi, skorzystamy z techniki gradientowej optymalizacji. Należy obliczyć gradient dla wyjścia modelu oraz przewidywanego wyjścia i odwrócić kierunek w stronę (lokalnego) optimum. Dla funkcji sigmoidalnej postaci:
+Aby można było oszacować zmianę wagi, skorzystamy z techniki spadku gradientowego. Gradient jest operacją matematyczną, która określa funkcje pochodne dla każdego argumentu danej funkcji. Pozwala ona wskazać kierunek i odległość, jaką dzieli dany punkt od miejsca optimum. Należy obliczyć gradient dla wyjścia modelu oraz przewidywanego wyjścia i odwrócić kierunek w stronę (lokalnego) optimum poprzez odwrócenie znaku. Dla funkcji sigmoidalnej postaci:
 
 $$
 f(x)=\frac{1}{1+e^{-x}}
@@ -264,7 +296,7 @@ $I$ - liczba neuronów w warstwie wejścia \
 $O$ - liczba neuronów w warstwie wyjścia
 
 $w_{j,l}^{i,k}$, $i\lt j$ - waga pomiędzy $k$-tym neuronem $i$-tej warstwy, a $l$-tym neuronem $j$-tej warstwy\
-$b_{i,j}$ - szum (bias) w $j$-tym neuronie $i$-tej warstwy\
+$b_{i,j}$ - wyraz wolny (bias) w $j$-tym neuronie $i$-tej warstwy\
 $n_{i,j}$ - wartość sygnału neuronu w $j$-tym neuronie w $i$-tej warstwie
 
 $\delta_{j,l}^{i,k}$, $i\lt j$ - zmiana wagi pomiędzy $k$-tym neuronem $i$-tej warstwy, a $l$-tym neuronem $j$-tej warstwy\
@@ -281,48 +313,53 @@ $O=1$
 
 Dla neuronu wyjściowego (warstwy wyjściowej) wzór na zmianę wag połączeń kończących się w nim jest następujący:
 
-$
+$$
 \delta_{3,1}^{2,k}=e_{3,1} \cdot \frac{d}{dx}f(n_{3,1})
-$
+$$
 
-$
+$$
 w_{3,1}^{2,k} = w_{3,1}^{2,k} + n_{3,1}^T \cdot \delta_{3,1}^{2,k} \cdot \lambda
-$
+$$
 
-$
+$$
 b_{3,1} = b_{3,1} + \sum_{k=1}^M \delta_{3,1}^{2,k}\\
-$
+$$
 
-$k=\overline{1,M}$
+$$k=\overline{1,M}$$
+
+
+![image](imgs/backpropagation%201.png)
 
 Dla warstwy ukrytej zmiany wag oblicza się w następujący sposób:
 
-$
+$$
 \delta_{2,l}^{1,k} = w_{2,l}^{1,k} \cdot \frac{d}{dx} f(n_{1,l}) \\
-$
+$$
 
-$
+$$
 w_{2,l}^{1,k} = w_{2,l}^{1,k} + n_{1,l}^T \cdot \delta_{2,l}^{1,k}
-$
+$$
 
-$
+$$
 b_{1,l} = b_{1,l} + \sum_{k=1}^M \delta_{2,l}^{1,k}\\
-$
+$$
 
-$k,l=\overline{1,M}$
+$$k,l=\overline{1,M}$$
 
+![image](imgs/backpropagation%202.png)
 Współczynnik uczenia ustawia się po to, aby parametry miały szansę odnaleźć lepsze optimum lokalne. Bez tego model natychmiast wpadnie w najbliższe optimum lokalne, które najczęściej będzie ono niesatysfakcjonujące.
 
 #### Interpretacje sieci głębokich
 
 Pierwszą interpretacją, jaką proponuje R. Hurbans w [RHu] jest to, że każda kolejna warstwa ANN tworzy coraz bardziej korelujące dane, które wreszcie stają się w pełni skorelowane na warstwie wyjściowej.
 
+
+![image](imgs/grupowanie%20danych%20w%20klasy.png)
+
 Drugą interpretacją zaproponowaną w [Wel] jest to, że sieć neuronową odwzorowuje mapa regionów decyzyjnych oddzielonych granicami decyzyjnymi. Im więcej neuronów, tym więcej granic i obszarów, lecz im więcej warstw w sieci, tym więcej takich obszarów i tym mniejszy koszt obliczeniowy. Dobrze oddaje to wzór na maksymalną liczbę regionów:
 
 $$
-
 N = (\frac{D}{D_i} + 1)^{D_i (K-1)}(\frac{D^2+D+2}{2})
-
 $$
 
 Gdzie:
@@ -333,17 +370,24 @@ $K$ - liczba warstw pośrednich
 
 W tym ujęciu sieci trzywarstwowe zawierające tylko jedną warstwę ukrytą są ukazane jako nieefektywne, ponieważ mają one mniejszą elastyczność wyrażaną liczbą regionów. Ze wzoru można wywnioskować, że przyrost liczby regionów jest wielomianowy, natomiast ten sam przyrost wywołany zwiększeniem liczby warstw jest wykładniczy.
 
+![image](imgs/regiony%20decyzyjne.png)
 Ogólnie rzecz biorąc, ciężko jest stworzyć czytelną i zrozumiałą interpretację modelu dla każdego problemu. Każdy neuron w sieci wykonuje swoje zadanie, które trudno jest opisać jednoznacznie i precyzyjnie. Ale są metody, które pomagają zrozumieć to, jak dana sieć neuronowa dochodzi do rozwiązań. Nimi zajmuje się osobna dziedzina badań - XAI (Explainable AI), dzięki której zyskujemy coraz lepszy wgląd w proces rozumowania systemów opartych na modelach AI, na podstawie którego można oceniać bezpieczeństwo i słuszność w podejściu tych modeli.
 
 ### 1.4 Istota treningu ANN
 
 Właściwe ustawienie wag w sieci głębokiej polega na tym, że dla danego zestawu danych treningowych sieć głęboka musi zwracać jak najmniejszy błąd na wyjściu. Algorytm propagacji wstecz działa na zasadzie spadku gradientowego. Niestety (dla architektów sieci głębokich) albo na szczęście (bowiem taka jest rzeczywistość) świat jest bardziej skomplikowany niż funkcja liniowa. W przestrzeni rozwiązań dopuszczalnych są rozwiązania, które zwracają zaledwie minima lokalne funkcji błędu, ale jest też co najmniej jedno rozwiązanie, które zwraca minimum globalne. Gradienty mogą zwracać wartości, które niekoniecznie kierują na minimum globalne, lecz na minimum lokalne, co bez dwóch zdań utrudnia trening. Zatem podczas treningu trzeba zwracać uwagę na to, aby kierunek optymalizacji był z jak największym prawdopodobieństwem zgodny z położeniem minimum globalnego, ewentualnie położeniem rozwiązania w granicach dopuszczalnego błędu względem minimum globalnego.
 
+
+![image](imgs/minimalizacja.png)
+
 Można to uprawdopodobnić na wiele sposobów. Na przykład podczas inicjalizacji wag losuje się kilka lub więcej zestawów, a następnie dokonuje się selekcji takiego zestawu, który zwraca najmniejszy błąd.
 
-Zamiast algorytmu stochastycznego spadku gradientowego stosuje się inne, które na różnych etapach treningu promują bardziej eksplorację, niż eksploatację przestrzeni rozwiązań i vice versa. Robią to poprzez modyfikację współczynnika $\lambda$, który odpowiada za wielkość kroku (wyżarzanie kosinusowe). Robią to poprzez szacowanie pędów (momentów) gradientów (rodzina algorytmów Adam).
+Klasyczny algorytm stochastycznego spadku gradientowego wzbogaca się innymi metodami, które na różnych etapach treningu promują bardziej eksplorację, niż eksploatację przestrzeni rozwiązań i vice versa. Jedne metody robią to poprzez modyfikację współczynnika $\lambda$, który odpowiada za wielkość kroku (wyżarzanie kosinusowe). A inne robią to poprzez szacowanie pędów (momentów) gradientów (rodzina algorytmów Adam).
 
-Kolejną sprawą jest zapobieganie przesadnemu dopasowaniu modelu do danych treningowych. Objawia się to tym, że dla danych treningowych model bardzo trafnie przewiduje wyniki, zaś dla danych spoza tego zbioru model cechuje się gorszą precyzją, która w skrajnych sytuacjach będzie mniej lub bardziej podobna do zgadywania. W terminologii, która bardzo wiele zawdzięcza światu anglosaskiemu, nazywa się to **overfittingiem**. O sposobach na zapobieganie mu [piszę tutaj](#32-sposoby-na-ograniczenie-overfittingu).
+![image](imgs/eksploracja%20vs%20eksploatacja.png)
+Kolejną sprawą jest zapobieganie przesadnemu dopasowaniu modelu do danych treningowych. Objawia się to tym, że dla danych treningowych model bardzo trafnie przewiduje wyniki, zaś dla danych spoza tego zbioru model cechuje się gorszą dokładnością, która w skrajnych sytuacjach będzie mniej lub bardziej podobna do zgadywania. W terminologii, która bardzo wiele zawdzięcza światu anglosaskiemu, nazywa się to **overfittingiem**. O sposobach na zapobieganie mu [piszę tutaj](#32-batch-czy-mini-batch-czyli-o-dzieleniu-danych-treningowych).
+
+![image](imgs/overfitting.png)
 
 ### 1.5 Zastosowania
 
@@ -398,6 +442,9 @@ Pytania, na które poznasz odpowiedź w tym rozdziale.
 
 ### 3.1 Optimizery
 
+
+![image](imgs/metody%20optymalizacji.png)
+
 #### Stochastyczna optymalizacja gradientowa (SGD)
 
 #### SGD z pędem
@@ -412,41 +459,131 @@ Pytania, na które poznasz odpowiedź w tym rozdziale.
 
 #### AdamW
 
-### 3.2 Sposoby na ograniczenie overfittingu
+### 3.2 Batch czy mini batch? Czyli o dzieleniu danych treningowych
+
+Istnieją różne podejścia w przekazywaniu danych podczas pętli treningowej. Można podawać cały komplet, w oparciu o który model ustawia swoje wagi. Można podawać je pojedynczo, albo partiami liczącymi po kilka przykładów. Poniżej opisuję ich wady oraz zalety, które warto znać.
+
+#### Metoda spadku gradientu (batch gradient descent)
+
+Polega ona na obliczaniu nowych wag po przeprocesowaniu całego zbioru treningowego. Pozwala ona uzyskiwać dokładne poprawki, które są uśrednione dla całego zbioru treningowego. Wyróżnia się dodatkowo stabilnością, przez którą funkcja straty jest malejąca, co widać na wykresie spadku straty. Wadą jest pamięciożerność oraz czasochłonność, gdyż model musi obliczać w każdej epoce predykcje dla wszystkich przykładów.
+
+#### Metoda stochastycznego spadku gradientu (SGD)
+
+Metoda stochastyczna polega na obliczaniu nowych wag przy użyciu tylko jednej obserwacji ze zbioru treningowego.
+
+Dzięki temu pętla treningowa zużywa mniej pamięci, ponieważ trzeba przechowywać mniej predykcji w każdej iteracji. Ta metoda jest też o wiele szybsza. Pozwala ona unikać minimów lokalnych. Świetnie nadaje się zarówno do ogromnych zbiorów danych, jak i systemów chmurowych, a także do urządzeń brzegowych (IoT, telefony, tablety).
+
+Metoda ta za sprawą swoich zalet ma następujące wady. Po pierwsze, trening jest niestabilny, gdyż wagi są gwałtownie zmieniane, a informacja z poprzednich iteracji może zostać zatracona. Po drugie, model podczas treningu wykazuje wysokie tendencje do oscylowania wokół docelowego minimum.
+
+Aby ta metoda była skuteczna, należy przed każdą epoką losować kolejność podawania danych treningowych.
+
+#### Mini-batch gradient descent
+
+Rozwiązaniem kompromisowym jest dzielenie zbioru treningowego na porcje danych liczące po kilka lub więcej obserwacji. To podejście pozwala zarówno ustabilizować trening, jak i zachować zalety poprzedniej metody takie jak unikanie minimów lokalnych. Jest szeroko wykorzystywana do trenowania ogromnych modeli przy użyciu dużych zbiorów danych.
+
+Jednakże, aby wykorzystać pełen potencjał tej metody, należy próbować różnych rozmiarów tych batch'y (porcji danych). Zaleca się, aby liczba ta była potęgą dwójki, aby móc optymalnie wykorzystywać zasoby obliczeniowe kart graficznych. Można zacząć próbować od wielkości 16 lub 32 obserwacji.
+
+### 3.3 Sposoby na ograniczenie overfittingu
 
 #### Hold-out
 
-Hold-out polega na dzieleniu zbioru danych na podzbiór treningowy i testowy. W praktyce często wyznacza się też osobny zbiór walidacyjny, który pozwala na bieżąco oceniać postęp treningu epoka za epoką.
+Hold-out polega na dzieleniu zbioru danych na podzbiór treningowy i testowy. W praktyce często wyznacza się też osobny zbiór walidacyjny, który pozwala na bieżąco oceniać postęp treningu po każdej epoce.
+
+Dzięki temu podziałowi można w banalny sposób ocenić, czy model jest nadmiernie dopasowany, czy nie. Wystarczy spojrzeć na metryki dokładności i stwierdzić, czy dla zbioru testowego są one istotnie mniejsze, niż dla zbioru treningowego. Jeżeli tak, to model jest nadmiernie dopasowany. Jeżeli nie, to oznacza, że model umie generalizować.
+
+Należy przy tym uważać na *wycieki danych*, czyli sytuacje gdzie do danych treningowych dostają się informacje, które w nieuprawniony sposób ułatwiają modelowi przewidywania czyli m.in. obserwacje ze zbioru testowego, charakterystyczne sygnatury na zdjęciach lub w nagraniach, które pasują do prawidłowych etykiet
 
 #### Walidacja krzyżowa
 
-w przypadku większych modeli może okazać się zbyt kosztowna.
+Polega ona na dzieleniu danych na równe fragmenty, zwykle 3, 5 lub więcej i trenowaniu modelu na różnych kombinacjach tych fragmentów. Do testowania używa się jednego fragmentu, a do treningu pozostałych. Proces wybierania i trenowania na kolejnych kombinacjach fragmentów jest powtarzany tyle razy, ile jest fragmentów (skąd pochodzi jego nazwa).
+
+Dzięki temu można dobrać taką konfigurację danych treningowych, która buduje najlepszy model ze wszystkich dostępnych konfiguracji. Niestety, dla modeli opartych o głębokie sieci neuronowe jest ona zbyt kosztowna.
 
 #### Regularyzacja
 
-- Regularyzacja L1 (lasso) i L2 (ridge);
+Regularyzacja to technika polegające na obciążaniu funkcji straty dodatkowymi karami za wagi, które zwiększają złożoność modelu i utrudniają generalizację. Wyróżnia się dwie techniki:
+
+- L1 (tzw. lasso)
+- L2 (tzw. ridge)
+
+Pierwsza technika dodaje do funkcji kary sumę ***wartości bezwzględnych*** każdej wagi zmodyfikowaną o hiperparametr $\lambda$. Dzięki temu można wyzerować najmniej znaczące wagi, co istotnie upraszcza model. Metoda ta jest odporna na obserwacje odstające (outlier'y).
+
+$$
+f'_{kara}(w) = f_{kara}(w)+\lambda \cdot \sum{|w_{i}|}
+$$
+
+Druga technika polega na dodaniu sumy kwadratów wag zmodyfikowaną też o hiperparametr $\lambda$. Dodanie jej sprawia, że wagi modelu będą oscylowały wokół zera, ale go nie osiągną. Technika ta pozwala modelowi nauczyć się złożonych schematów, które pozwolą poprawnie przewidywać wynik. Niestety, ta metoda nie jest odporna na obserwacje odstające.
+
+$$
+f'_{kara}(w) = f_{kara}(w)+\lambda \cdot \sum{w_{i}^2}
+$$
+
+W praktyce najczęściej stosuje się metodę L2, ale nic nie stoi na przeszkodzie, aby stosować je jednocześnie.
+$$
+f'_{kara}(w) = f_{kara}(w)+\lambda_1 \cdot \sum{|w_{i}|}+\lambda_2 \cdot \sum{w_{i}^2}
+$$
 
 #### Dropout
 
-- Dropout;
+Polega na losowym zerowaniu wag podczas treningu we wskazanej warstwie lub warstwach. Sterowanie polega na określeniu prawdopodobieństwa, z jakim dowolna waga zostanie wyzerowana po propagacji w tył. Dzięki temu model staje się prostszy, lecz na osiągnięcie pełnej konwergencji model potrzebuje więcej epok.
 
 #### Eliminacja zmiennych nieistotnych
 
+Podczas pracy analitycznej nie wszystkie zmienne są potrzebne. Aby móc wskazać, które są nieistotne, można posłużyć się różnymi sposobami. Poniżej wymieniam te najważniejsze:
+
+- Macierz korelacji
+- Analiza wariancji
+- Dwuczynnikowa analiza wariancji (ANOVA)
+- Test niezależności Chi-kwadrat
+- Eliminacja wsteczna
+
+Macierz korelacji pozwala określić, które zmienne są nieskorelowane ze sobą, a które są zbyt mocno skorelowane. Jeżeli dwie zmienne, które mają określać zmienną zależną, są ze sobą silnie skorelowane, to należy odrzucić jedną z nich. Jeżeli któraś ze zmiennych jest najsłabiej skorelowana ze zmienną zależną, to tą też należy odrzucić.
+
+Analiza wariancji jest wglądem w to, czy zmienna ma za małą wariancję. Jest to bardzo ważne, bowiem bez odpowiednio dużej wariancji nie ma mowy o poprawnej predykcji. Wynika to pośrednio z twierdzenia FWL, gdyż zmienna będąca praktycznie stałowartościowa stworzy model regresji o idealnej współliniowości ze zmienną zależną. Z matematycznego punktu widzenia zerowa wariancja uniemożliwia stworzenie współczynnika kierunkowego $\beta$, a numerycznie wartość wariancji oscylującej wokół zera komplikuje budowę modelu.
+
+$$\beta = \frac{Cov(X_1,X_2)}{Var(X_1)}$$
+
+Dwuczynnikowa analiza wariancji jest testem pozwalającym stwierdzić, czy zmienna numeryczna ma wpływ na zmienną objaśnianą. Zwraca ona wartość testu i wartość p (*p-value*). Istotność zmiennej określa się na podstawie tego, czy wartość p nie przekracza progu 0.05. W zasadzie to są trzy progi:
+
+- 0.001 - poniżej tego progu zmienna ma duży wpływ na zmienną objaśnianą;
+- 0.01 - poniżej tego progu zmienna ma co najmniej umiarkowany wpływ;
+- 0.05 - poniżej tego progu zmienna ma co najmniej istotny wpływ;
+
+Test ANOVA pozwala też badać wpływ zmiennej kategorialnej, o ile ma co najmniej trzy kategorie. Jeżeli zmienna kategorialna nie ma rozkładu normalnego, to stosuje się test Kruskala-Wallisa dla kategorii niezależnych, a dla zależnych test Friedmana.
+
+Poniżej tej liczby stosuje się test t-Studenta. Jeżeli zmienna objaśniająca nie ma rozkładu normalnego to stosuje się test Manna-Whiteneya dla kategorii niezależnych lub test Wilcoxona dla kategorii zależnych od siebie.
+
+Test niezależności Chi-kwadrat sprawdza, czy zmienna kategorialna ma wpływ na zmienną objaśnianą (która też jest kategorialna). Tak samo jak w teście ANOVA bada się jego istotność i porównuje się ww. progami. Należy przedtem sprawdzić, czy kategorie w zmiennych są zależne od siebie. Jeśli tak, to należy zaniechać używania tego testu i użyć takiego, który będzie pasować.
+
+Jeżeli zmienna objaśniająca jest numeryczna, a objaśniana jest zmienną kategorialną, to dla nich buduje się model regresji logistycznej i bada się jego metryki.
+
+Eliminacja wsteczna jest metodą, która polega na budowaniu modelu, sprawdzaniu metryk i iteracyjnym odrzucaniu najmniej istotnych zmiennych.
+
 #### Wzbogacanie danych treningowych (data augmentation)
 
-wprowadzanie do zbioru danych treningowych artefaktów, które w praktycznym zastosowaniu mogłyby zaburzać pracę, ale podczas treningu uodporniają model na anomalie otrzymane na wejściu. Sprowadza się to do dodawania mniej lub bardziej regularnych szumów, zakrywania części obrazu i innych manipulacji;
+Ta technika polega na wprowadzaniu do zbioru danych treningowych artefaktów, które w praktycznym zastosowaniu mogłyby zaburzać pracę, ale podczas treningu uodporniają model na anomalie otrzymane na wejściu. Sprowadza się to do dodawania mniej lub bardziej regularnych szumów do danych treningowych, zakrywania części obrazu i innych manipulacji na danych, które mogą być przypadkowe lub zamierzone przez stronę atakującą dany model.
+
+Technika ta jest szeroko stosowana w modelach wizji komputerowej, gdyż pozwala ona uodpornić model na zakłócenia pracy kamery oraz poprawić zdolność modelu do generalizacji.
 
 #### Ograniczanie złożoności modelu
 
-### 3.3 XAI
+Polega to na redukcji neuronów w określonych warstwach lub usuwaniu całych warstw w sieci neuronowej. Ma to na celu zmniejszyć złożoność modelu i poprawić wyniki inferencji.
+
+#### Wczesne kończenie treningu
+
+Polega to na kończeniu treningu wtedy, gdy metryki wskazują na to, że dalszy trening nie umożliwi istotnego poprawienia wag modelu, a jednocześnie dalszy trening spowoduje nadmierne dopasowanie do danych treningowych.
+
+### 3.4 XAI
 
 SHAP, LIME, wykresy PDP, ICE, testy ANOVA jedno i dwukierunkowe
 
-### 3.4 Metody treningu z niewielką lub żadną ilością danych
+### 3.5 Metody treningu z niewielką lub żadną ilością danych
 
-### 3.5 Architektury modeli STT i TTS
+### 3.6 Architektury modeli STT i TTS
 
 CNN, RNN i Transformery
+
+### 3.7 Antykruchość, czyli lekcja dla każdego analityka
 
 ## 4 Bibliografia
 
@@ -461,3 +598,51 @@ CNN, RNN i Transformery
 9. A. Zhang, Z. C. Lipton, M. Li, A. J. Smola. Dive into Deep Learning. Release 0.16.1. 19.01.2021
 10. [Wel] Illustrated guide to AI. Volume I. The Welch Labs. 2025
 11. A. W. Trask. Zrozumieć głębokie uczenie. Wydawnictwo PWN. Warszawa 2019. ISBN: 978-83-01-20782-3
+12. L. Bhuva. Mini-Batch Gradient Descent: A Comprehensive Guide, [online]. Dostęp w Internecie: <https://medium.com/@lomashbhuva/mini-batch-gradient-descent-a-comprehensive-guide-ba27a6dc4863>. [dostęp: 31.08.2026]
+13. Książka o analizie danych
+
+## 5 Słownik pojęć technicznych i anglojęzycznych
+
+**Batch** - wsad, partia, porcja (zwykle danych treningowych);
+
+**Celność** - opisuje bliskość wyniku do wskazanego celu;
+
+**Dokładność** - patrz: **Celność**;
+
+**Etykieta** - wartość zmiennej kategorialnej
+
+**Ex ante** - łac. "przed faktem". Dotyczy właściwości modelu ocenianych na podstawie danych treningowych;
+
+**Ex post** - łac. "po fakcie". Dotyczy właściwości modelu ocenianych na podstawie danych testowych;
+
+**Funkcja kosztu** - funkcja, która zwraca miarę odległości przewidywań modelu od poprawnych wyników;
+
+**Funkcja straty** - patrz: **Funkcja kosztu**;
+
+**Generalizacja** - zdolność modelu do poprawnego przewidywania wyników dla sytuacji, w których nie był trenowany dzięki redukcji złożoności i upraszczaniu;
+
+**Inferencja** - czas od wprowadzenia danych do modelu do uzyskania prognoz;
+
+**Konwergencja** - zbieżność, podobieństwo;
+
+**Logity** - surowe wartości uzyskiwane na wyjściu modelu. Im większe, tym większe prawdopodobieństwo przynależności obserwacji do poszczególnych kategorii zmiennej objaśnianej. Dziedziną logitów jest zbiór liczb rzeczywistych;
+
+**Precyzja** - opisuje miarę rozrzutu wyników. Wysoka precyzja oznacza niewielki rozrzut i vice versa;
+
+**Obserwacja** - pojedynczy zestaw wartości zmiennych objaśniających;
+
+**Predykcja** - zbiór prawdopodobieństw przynależności do kategorii zmiennej zależnej uzyskany z modelu lub oszacowanie wartości tejże zmiennej, jeżeli jest numeryczna;
+
+**Prognoza** - patrz: **Predykcja**;
+
+**Zmienna ilościowa** - zmienna, którą reprezentuje liczba;
+
+**Zmienna jakościowa** - zmienna, którą reprezentuje coś innego niż liczba np. słowo, litera;
+
+**Zmienna kategorialna** - zmienna, która opisuje przynależność do pewnej grupy lub kategorii. Dzieli się je na nominalne (kategorie są równoważne) i porządkowe (kategorie układają się w porządku hierarchicznym);
+
+**Zmienna objaśniająca** - zmienna, która ma wpływ na **zmienną objaśnianą**. Może być argumentem dla funkcji zwracającej wartości zmiennej objaśnianej lub wejściem modelu;
+
+**Zmienna objaśniana** - zmienna, którą ma odzwierciedlać dana funkcja lub którą ma naśladować dany model;
+
+**Zmienna zależna** - patrz: **Zmienna objaśniana**
