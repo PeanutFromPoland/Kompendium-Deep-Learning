@@ -14,14 +14,14 @@
 ## Spis treści
 
 - [Sztuczne Sieci Neuronowe](#sztuczne-sieci-neuronowe)
-  - [Release v0.2.0](#release-v020)
+  - [Release v0.3.0](#release-v030)
     - [Nowości](#nowości)
   - [Spis treści](#spis-treści)
   - [1 Wprowadzenie](#1-wprowadzenie)
     - [1.1 Inspiracja](#11-inspiracja)
     - [1.2 Perceptron](#12-perceptron)
     - [1.3 Funkcje aktywacji](#13-funkcje-aktywacji)
-      - [W przeszłości](#w-przeszłości)
+      - [Od perceptronu do współczesności](#od-perceptronu-do-współczesności)
       - [ReLU](#relu)
       - [Lista funkcji aktywacji](#lista-funkcji-aktywacji)
     - [1.4 Wielowarstwowy perceptron - sieć głęboka](#14-wielowarstwowy-perceptron---sieć-głęboka)
@@ -220,46 +220,33 @@ Propagacja w przód jest mechanizmem, który pozwala uzyskiwać prognozy po wpro
 Warstwa wejścia dostarcza danych liczbowych do neuronów pierwszej warstwy ukrytej. Każdy taki neuron z osobna w warstwie ma własny zestaw wag oraz wyraz wolny, zwany *biasem*, którymi traktuje dane wejściowe. Suma iloczynu skalarnego wektora wag i wektora danych wejściowych oraz wyrazu wolnego po zastosowaniu funkcji aktywacji stanowi sygnał wyjściowy danego neuronu. Sygnał ten następnie jest przekazywany do następnej warstwy oraz ich neuronów i traktowany w ten sam sposób.
 
 Dla wejścia:
+
 $$
 a^{(0)} = x
 $$
+
 Dla każdej warstwy $l=1,\dots,L$:
+
 $$
 z^{(l)} = W^{(l)}a^{(l-1)} + b^{(l)}
 $$
+
 następnie:
+
 $$
 a^{(l)} = f^{(l)}\left(z^{(l)}\right)
 $$
+
 Czyli cały krok dla jednej warstwy można zapisać jako:
+
 $$
-a^{(l)}
-=
-f^{(l)}
-\left(
-W^{(l)}a^{(l-1)} + b^{(l)}
-\right)
+a^{(l)}=f^{(l)}\left(W^{(l)}a^{(l-1)} + b^{(l)}\right)
 $$
+
 A dla całej sieci:
+
 $$
-a^{(L)}
-=
-f^{(L)}
-\left(
-W^{(L)}
-f^{(L-1)}
-\left(
-W^{(L-1)}
-\dots
-f^{(1)}
-\left(
-W^{(1)}x+b^{(1)}
-\right)
-\dots
-+b^{(L-1)}
-\right)
-+b^{(L)}
-\right)
+a^{(L)}=f^{(L)}\left(W^{(L)}f^{(L-1)}\left(W^{(L-1)}\dotsf^{(1)}\left(W^{(1)}x+b^{(1)}\right)\dots+b^{(L-1)}\right)+b^{(L)}\right)
 $$
 
 Sygnały z ostatniej warstwy ukrytej dochodzą do warstwy wyjściowej.
@@ -329,20 +316,26 @@ Oznaczenia:
 - $W^{(l)}$ – macierz wag połączeń prowadzących do warstwy $l$,
 - $b^{(l)}$ – wektor biasów warstwy $l$,
 - $z^{(l)}$ – wartości neuronów przed zastosowaniem funkcji aktywacji:
-  $$
-  z^{(l)} = W^{(l)}a^{(l-1)} + b^{(l)}
-  $$
+
+$$
+z^{(l)} = W^{(l)}a^{(l-1)} + b^{(l)}
+$$
+  
 - $a^{(l)}$ – sygnały neuronów po zastosowaniu funkcji aktywacji:
-  $$
-  a^{(l)} = f^{(l)}(z^{(l)})
-  $$
+
+$$
+a^{(l)} = f^{(l)}(z^{(l)})
+$$
+  
 - $f^{(l)}$ – funkcja aktywacji stosowana w warstwie $l$,
 - $f'^{(l)}$ – pochodna funkcji aktywacji,
 - $\mathcal L$ – funkcja straty,
 - $\delta^{(l)}$ – lokalny sygnał błędu/gradientu w warstwie $l$:
-  $$
-  \delta^{(l)}=\frac{\partial\mathcal L}{\partial z^{(l)}}
-  $$
+
+$$
+\delta^{(l)}=\frac{\partial\mathcal L}{\partial z^{(l)}}
+$$
+  
 - $\frac{\partial\mathcal L}{\partial W^{(l)}}$ – gradient funkcji straty względem wag warstwy $l$,
 - $\frac{\partial\mathcal L}{\partial b^{(l)}}$ – gradient funkcji straty względem biasów warstwy $l$,
 - $\eta$ – współczynnik uczenia (learning rate),
@@ -362,9 +355,7 @@ $$
 dla warstwy wyjściowej:
 
 $$
-\delta^{(L)}
-=
-\frac{\partial \mathcal L}{\partial z^{(L)}}
+\delta^{(L)}=\frac{\partial \mathcal L}{\partial z^{(L)}}
 $$
 
 
@@ -373,7 +364,7 @@ $$
 Dla warstwy ukrytej zmiany wag oblicza się w następujący sposób:
 
 $$
-\delta^{(l)}=\left(W^{(l+1)}\right)^T\delta^{(l+1)}\cdotf'^{(l)}(z^{(l)})
+\delta^{(l)}=\left(W^{(l+1)}\right)^T\delta^{(l+1)}\cdot f'^{(l)}(z^{(l)})
 $$
 
 gradient wag:
@@ -391,11 +382,11 @@ $$
 i dopiero potem aktualizacja przez prosty gradient descent:
 
 $$
-W^{(l)}\leftarrowW^{(l)}-\eta\frac{\partial\mathcal L}{\partial W^{(l)}}
+W^{(l)}\leftarrow W^{(l)}-\eta\frac{\partial\mathcal L}{\partial W^{(l)}}
 $$
 
 $$
-b^{(l)}\leftarrowb^{(l)}-\eta\frac{\partial\mathcal L}{\partial b^{(l)}}
+b^{(l)}\leftarrow b^{(l)}-\eta\frac{\partial\mathcal L}{\partial b^{(l)}}
 $$
 
 ![image](imgs/backpropagation%202.png)
