@@ -350,13 +350,17 @@ Oznaczenia:
 $$
 a^{(0)}=x
 $$
+
 $$
 z^{(l)}=W^{(l)}a^{(l-1)}+b^{(l)}
 $$
+
 $$
 a^{(l)}=f^{(l)}(z^{(l)})
 $$
+
 dla warstwy wyjściowej:
+
 $$
 \delta^{(L)}
 =
@@ -369,47 +373,30 @@ $$
 Dla warstwy ukrytej zmiany wag oblicza się w następujący sposób:
 
 $$
-\delta^{(l)}
-=
-\left(W^{(l+1)}\right)^T
-\delta^{(l+1)}
-\cdot
-f'^{(l)}(z^{(l)})
+\delta^{(l)}=\left(W^{(l+1)}\right)^T\delta^{(l+1)}\cdotf'^{(l)}(z^{(l)})
 $$
+
 gradient wag:
+
 $$
-\frac{\partial\mathcal L}{\partial W^{(l)}}
-=
-\delta^{(l)}
-\left(a^{(l-1)}\right)^T
+\frac{\partial\mathcal L}{\partial W^{(l)}}=\delta^{(l)}\left(a^{(l-1)}\right)^T
 $$
+
 gradient biasu:
+
 $$
-\frac{\partial\mathcal L}{\partial b^{(l)}}
-=
-\delta^{(l)}
+\frac{\partial\mathcal L}{\partial b^{(l)}}=\delta^{(l)}
 $$
 
 i dopiero potem aktualizacja przez prosty gradient descent:
 
 $$
-W^{(l)}
-\leftarrow
-W^{(l)}
--
-\eta
-\frac{\partial\mathcal L}{\partial W^{(l)}}
-$$
-$$
-b^{(l)}
-\leftarrow
-b^{(l)}
--
-\eta
-\frac{\partial\mathcal L}{\partial b^{(l)}}
+W^{(l)}\leftarrowW^{(l)}-\eta\frac{\partial\mathcal L}{\partial W^{(l)}}
 $$
 
-
+$$
+b^{(l)}\leftarrowb^{(l)}-\eta\frac{\partial\mathcal L}{\partial b^{(l)}}
+$$
 
 ![image](imgs/backpropagation%202.png)
 Współczynnik uczenia określa wielkość kroku wykonywanego przez algorytm korygujący wagi (optimizer). Im mniejszy, tym wolniejszy trening. Im większy, tym większa tendencja do oscylacji i przeskakiwania potencjalnie dobrych obszarów.
