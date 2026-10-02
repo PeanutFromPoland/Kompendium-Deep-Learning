@@ -218,8 +218,47 @@ Propagacja w przód jest mechanizmem, który pozwala uzyskiwać prognozy po wpro
 
 Warstwa wejścia dostarcza danych liczbowych do neuronów pierwszej warstwy ukrytej. Każdy taki neuron z osobna w warstwie ma własny zestaw wag oraz wyraz wolny, zwany *biasem*, którymi traktuje dane wejściowe. Suma iloczynu skalarnego wektora wag i wektora danych wejściowych oraz wyrazu wolnego po zastosowaniu funkcji aktywacji stanowi sygnał wyjściowy danego neuronu. Sygnał ten następnie jest przekazywany do następnej warstwy oraz ich neuronów i traktowany w ten sam sposób.
 
+Dla wejścia:
 $$
-n(x) = f(\sum_i{w_i x_i} + b)
+a^{(0)} = x
+$$
+Dla każdej warstwy $l=1,\dots,L$:
+$$
+z^{(l)} = W^{(l)}a^{(l-1)} + b^{(l)}
+$$
+następnie:
+$$
+a^{(l)} = f^{(l)}\left(z^{(l)}\right)
+$$
+Czyli cały krok dla jednej warstwy można zapisać jako:
+$$
+a^{(l)}
+=
+f^{(l)}
+\left(
+W^{(l)}a^{(l-1)} + b^{(l)}
+\right)
+$$
+A dla całej sieci:
+$$
+a^{(L)}
+=
+f^{(L)}
+\left(
+W^{(L)}
+f^{(L-1)}
+\left(
+W^{(L-1)}
+\dots
+f^{(1)}
+\left(
+W^{(1)}x+b^{(1)}
+\right)
+\dots
++b^{(L-1)}
+\right)
++b^{(L)}
+\right)
 $$
 
 Sygnały z ostatniej warstwy ukrytej dochodzą do warstwy wyjściowej.
@@ -376,7 +415,7 @@ Współczynnik uczenia określa wielkość kroku wykonywanego przez algorytm kor
 
 #### Interpretacje sieci głębokich
 
-Pierwszą interpretacją, jaką proponuje R. Hurbans w [RHu] jest to, że kolejne warstwy przekształcają reprezentację danych w taką, w której cechy istotne dla zadania stają się łatwiejsze do wykorzystania przez kolejne warstwy, co ułatwia w ostatniej warstwie wskazanie poprawnej prognozy dzięki widocznym cechom.
+Pierwszą interpretacją, jaką proponuje R. Hurbans w [RHu] jest to, że kolejne warstwy przekształcają reprezentację danych w taką, w której cechy istotne dla zadania stają się łatwiejsze do wykorzystania przez kolejne warstwy, co ułatwia w ostatniej warstwie wskazanie poprawnej prognozy dzięki uwidocznionym cechom.
 
 
 ![image](imgs/grupowanie%20danych%20w%20klasy.png)
