@@ -1,6 +1,6 @@
 # Sztuczne Sieci Neuronowe
 
-## Release v0.2.0
+## Release v0.3.0
 
 ### Nowości
 
@@ -8,7 +8,8 @@
 - Ilustracje do rozdziału 1.
 - Sposoby na ograniczenie overfittingu
 - Słownik pojęć technicznych
-- Optimizery [?]
+- Optimizery
+- Omówienie różnych architektur sieci neuronowych
 
 ## Spis treści
 
