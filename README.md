@@ -246,7 +246,7 @@ $$
 A dla całej sieci:
 
 $$
-a^{(L)}=f^{(L)}\left(W^{(L)}f^{(L-1)}\left(W^{(L-1)}\dotsf^{(1)}\left(W^{(1)}x+b^{(1)}\right)\dots+b^{(L-1)}\right)+b^{(L)}\right)
+a^{(L)}=f^{(L)}\left(W^{(L)}f^{(L-1)}\left(W^{(L-1)}\dots f^{(1)}\left(W^{(1)}x+b^{(1)}\right)\dots+b^{(L-1)}\right)+b^{(L)}\right)
 $$
 
 Sygnały z ostatniej warstwy ukrytej dochodzą do warstwy wyjściowej.
